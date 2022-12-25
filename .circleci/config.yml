@@ -10,15 +10,17 @@ jobs:
     steps:
       - checkout
       - tfsec/scan: 
-          directory: .
+          directory: ./infrastructure
           exclude-checks: 'aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-no-public-egress-sgr,aws-ec2-no-public-ingress-sgr'
+
 
   terraform-init:
     executor: terraform/default
     steps:
       - checkout
+      - run : pwd
       - terraform/init:
-          path: .
+          path: ./infrastructure
 
 
   terraform-validate:
@@ -26,7 +28,7 @@ jobs:
     steps:
       - checkout
       - terraform/validate:
-          path: .
+          path: ./infrastructure
 
 
   terraform-plan:
@@ -34,7 +36,7 @@ jobs:
     steps:
       - checkout
       - terraform/plan:
-          path: .
+          path: ./infrastructure
 
 
   terraform-apply:
@@ -42,16 +44,21 @@ jobs:
     steps:
       - checkout
       - terraform/apply:
-          path: .
+          path: ./infrastructure
 
 
   terraform-destroy:
     executor: terraform/default
     steps:
       - checkout
-      - run: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=prod/terraform.tfstate" -force-copy -get=true -input=false
-      - run: terraform destroy -auto-approve
-
+      - run: pwd
+      - run: ls -la
+      - run: 
+          path: /root/project/infrastructure
+          command: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=prod/terraform.tfstate" -force-copy -get=true -input=false
+      - run: 
+          path: /root/project/infrastructure
+          command: terraform destroy -auto-approve
 
 
   terratest:
@@ -76,8 +83,8 @@ jobs:
       - run:
           name: Run tests
           command: go test -v 
-      - run: ls -la
   
+
 
 
 
@@ -87,11 +94,13 @@ workflows:
 
     - scan-example
 
+
     - terraform-init:
         context: 
           - terraform
         requires:
         - scan-example
+
 
     - terraform-validate:
         context: 
@@ -99,16 +108,19 @@ workflows:
         requires:
         - terraform-init
 
+
     - terraform-plan:
         context: 
           - terraform
         requires:
         - terraform-validate
 
+
     - approve-plan:
         type: approval
         requires:
         - terraform-plan
+
 
     - terraform-apply:
         context: 
@@ -117,6 +129,7 @@ workflows:
         - terraform-plan
         - approve-plan
 
+
     - terratest:
         context: 
           - terraform
@@ -124,11 +137,13 @@ workflows:
         - approve-plan
         - terraform-apply
 
+
     - approve-test:
         type: approval
         requires:
         - approve-plan
         - terratest
+
 
     - terraform-destroy:
         context: 
