@@ -1,0 +1,156 @@
+---
+version: '2.1'
+orbs:
+  terraform: circleci/terraform@3.2.0
+  tfsec: mycodeself/tfsec@1.1.0
+jobs:
+  scan-example:
+    parameters:
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan: 
+          directory: .
+          exclude-checks: 'aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-no-public-egress-sgr,aws-ec2-no-public-ingress-sgr'
+
+  terraform-init:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/init:
+          path: .
+
+
+  terraform-validate:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/validate:
+          path: .
+
+
+  terraform-plan:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/plan:
+          path: .
+
+
+  terraform-apply:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/apply:
+          path: .
+
+
+  terraform-destroy:
+    executor: terraform/default
+    steps:
+      - checkout
+      - run: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=prod/terraform.tfstate" -force-copy -get=true -input=false
+      - run: terraform destroy -auto-approve
+
+
+
+  terratest:
+    docker:
+      - image: cimg/go:1.19.4
+    steps:
+      - checkout
+
+      - run: wget https://releases.hashicorp.com/terraform/1.3.5/terraform_1.3.5_linux_amd64.zip
+
+      - run: sudo unzip terraform_1.3.5_linux_amd64.zip -d /usr/local/bin
+
+      - run: ls -l /usr/local/bin
+
+      - run: terraform -version
+
+      - run: ls -la 
+
+      - run: go mod init mytests
+      - run: go mod tidy
+
+      - run:
+          name: Run tests
+          command: go test -v 
+      - run: ls -la
+  
+
+
+
+workflows:
+  deploy_infrastructure:
+    jobs:
+
+    - scan-example
+
+    - terraform-init:
+        context: 
+          - terraform
+        requires:
+        - scan-example
+
+    - terraform-validate:
+        context: 
+          - terraform
+        requires:
+        - terraform-init
+
+    - terraform-plan:
+        context: 
+          - terraform
+        requires:
+        - terraform-validate
+
+    - approve-plan:
+        type: approval
+        requires:
+        - terraform-plan
+
+    - terraform-apply:
+        context: 
+          - terraform
+        requires:
+        - terraform-plan
+        - approve-plan
+
+    - terratest:
+        context: 
+          - terraform
+        requires:
+        - approve-plan
+        - terraform-apply
+
+    - approve-test:
+        type: approval
+        requires:
+        - approve-plan
+        - terratest
+
+    - terraform-destroy:
+        context: 
+          - terraform
+        requires:
+        - approve-plan
+        - approve-test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
