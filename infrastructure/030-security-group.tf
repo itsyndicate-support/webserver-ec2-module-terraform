@@ -11,6 +11,7 @@ resource "aws_security_group" "administration" {
 
   # Open ssh port
   ingress {
+    description = "Inbound rule"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -19,6 +20,7 @@ resource "aws_security_group" "administration" {
 
   # Allow icmp
   ingress {
+    description = "Inbound rule"
     from_port   = 8
     to_port     = 0
     protocol    = "icmp"
@@ -27,6 +29,7 @@ resource "aws_security_group" "administration" {
 
   # Open access to public network
   egress {
+    description = "Outbound rule"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -45,6 +48,7 @@ resource "aws_security_group" "web" {
 
   # http port
   ingress {
+    description = "Inbound rule"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -53,6 +57,7 @@ resource "aws_security_group" "web" {
 
   # https port
   ingress {
+    description = "Inbound rule"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -61,6 +66,7 @@ resource "aws_security_group" "web" {
 
   # Open access to public network
   egress {
+    description = "Outbound rule"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -79,6 +85,7 @@ resource "aws_security_group" "db" {
 
   # db port
   ingress {
+    description = "Inbound rule"
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
@@ -87,6 +94,7 @@ resource "aws_security_group" "db" {
 
   # Open access to public network
   egress {
+    description = "Outbound rule"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
