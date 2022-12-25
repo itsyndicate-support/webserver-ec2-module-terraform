@@ -15,7 +15,7 @@ output "db_ip" {
 }
 
 
-#--------------- Terratests |---------------
+#--------------- Terratests ---------------
 
 output "first_web_server_ssh_key" {
   value = aws_instance.http["instance-http-1"].key_name
