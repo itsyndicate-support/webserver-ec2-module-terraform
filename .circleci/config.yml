@@ -4,7 +4,7 @@ orbs:
   terraform: circleci/terraform@3.2.0
   tfsec: mycodeself/tfsec@1.1.0
 jobs:
-  scan-example:
+  scan-example-env-prod:
     parameters:
     executor: tfsec/default
     steps:
@@ -14,40 +14,54 @@ jobs:
           exclude-checks: 'aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-no-public-egress-sgr,aws-ec2-no-public-ingress-sgr'
 
 
-  terraform-init:
+  terraform-init-env-prod:
     executor: terraform/default
     steps:
       - checkout
       - run : pwd
-      - terraform/init:
-          path: ./infrastructure
+      - run:
+          path: /root/project/infrastructure
+          command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
 
 
-  terraform-validate:
+  terraform-validate-env-prod:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/validate:
-          path: ./infrastructure
+      - run:
+          path: /root/project/infrastructure
+          command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+      - run:
+          path: /root/project/infrastructure
+          command: terraform validate
 
 
-  terraform-plan:
+  terraform-plan-env-prod:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/plan:
-          path: ./infrastructure
+      - run:
+          path: /root/project/infrastructure
+          command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+      - run:
+          path: /root/project/infrastructure
+          command: terraform plan -var="environment=$FIRST_ENVIRONMENT"
 
 
-  terraform-apply:
+  terraform-apply-env-prod:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/apply:
-          path: ./infrastructure
+      - run:
+          path: /root/project/infrastructure
+          command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+
+      - run:
+          path: /root/project/infrastructure
+          command: terraform apply -var="environment=$FIRST_ENVIRONMENT" -auto-approve 
 
 
-  terraform-destroy:
+  terraform-destroy-env-prod:
     executor: terraform/default
     steps:
       - checkout
@@ -55,13 +69,13 @@ jobs:
       - run: ls -la
       - run: 
           path: /root/project/infrastructure
-          command: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=prod/terraform.tfstate" -force-copy -get=true -input=false
+          command: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate" -force-copy -get=true -input=false -var="environment=$FIRST_ENVIRONMENT"
       - run: 
           path: /root/project/infrastructure
-          command: terraform destroy -auto-approve
+          command: terraform destroy -auto-approve -var="environment=$FIRST_ENVIRONMENT"
 
 
-  terratest:
+  terratest-env-prod:
     docker:
       - image: cimg/go:1.19.4
     steps:
@@ -80,6 +94,8 @@ jobs:
       - run: go mod init mytests
       - run: go mod tidy
 
+      - run: cd /home/circleci/project/infrastructure && terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+
       - run:
           name: Run tests
           command: go test -v 
@@ -89,68 +105,92 @@ jobs:
 
 
 workflows:
-  deploy_infrastructure:
+  deploy_infrastructure-to-prod:
     jobs:
 
-    - scan-example
+    - scan-example-env-prod:
+        filters:
+          branches:
+            only:
+              - main
 
 
-    - terraform-init:
+    - terraform-init-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        - scan-example
+        - scan-example-env-prod
 
 
-    - terraform-validate:
+    - terraform-validate-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        - terraform-init
+        - terraform-init-env-prod
 
 
-    - terraform-plan:
+    - terraform-plan-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        - terraform-validate
+        - terraform-validate-env-prod
 
 
-    - approve-plan:
+    - approve-plan-env-prod:
         type: approval
         requires:
-        - terraform-plan
+        - terraform-plan-env-prod
 
 
-    - terraform-apply:
+    - terraform-apply-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        # - terraform-plan
-        - approve-plan
+        - approve-plan-env-prod
 
 
-    - terratest:
+    - terratest-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        # - approve-plan
-        - terraform-apply
+        - terraform-apply-env-prod
 
 
-    - approve-test:
+    - approve-test-env-prod:
         type: approval
         requires:
-        # - approve-plan
-        - terratest
+        - terratest-env-prod
 
 
-    - terraform-destroy:
+    - terraform-destroy-env-prod:
         context: 
           - terraform
+        filters:
+          branches:
+            only:
+              - main
         requires:
-        # - approve-plan
-        - approve-test
+        - approve-test-env-prod
 
 
 

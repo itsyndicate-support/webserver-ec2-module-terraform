@@ -4,5 +4,8 @@
 # resource "aws_key_pair" "user_key" {
 #   key_name   = "user-key"
 #   public_key = ""
+#   tags = {
+#    Environment = var.environment
+#}
 # }
 

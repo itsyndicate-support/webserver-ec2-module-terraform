@@ -7,7 +7,7 @@ import (
     "github.com/gruntwork-io/terratest/modules/aws"
 )
 
-func TestMytests(t *testing.T) {
+func TestMytest(t *testing.T) {
     t.Parallel()
 
     terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
@@ -15,7 +15,6 @@ func TestMytests(t *testing.T) {
 		TerraformDir: "/home/circleci/project/infrastructure",
 	})
 
-    terraform.Init(t, terraformOptions)
     first_web_server_ssh_key := terraform.Output(t, terraformOptions, "first_web_server_ssh_key")
     assert.Equal(t, "gl-Frankfurt", first_web_server_ssh_key)
 
