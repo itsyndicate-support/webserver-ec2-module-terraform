@@ -18,8 +18,8 @@ jobs:
     executor: terraform/default
     steps:
       - checkout
-      - run : pwd
       - run:
+          name: terraform init
           path: /root/project/infrastructure
           command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
 
@@ -29,9 +29,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: terraform init
           path: /root/project/infrastructure
           command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+
       - run:
+          name: terraform validate
           path: /root/project/infrastructure
           command: terraform validate
 
@@ -41,9 +44,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: terraform init
           path: /root/project/infrastructure
           command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
+
       - run:
+          name: terraform plan
           path: /root/project/infrastructure
           command: terraform plan -var="environment=$FIRST_ENVIRONMENT"
 
@@ -53,10 +59,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: terraform init
           path: /root/project/infrastructure
           command: terraform init -var="environment=$FIRST_ENVIRONMENT" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate"
 
       - run:
+          name: terraform apply
           path: /root/project/infrastructure
           command: terraform apply -var="environment=$FIRST_ENVIRONMENT" -auto-approve 
 
@@ -65,12 +73,13 @@ jobs:
     executor: terraform/default
     steps:
       - checkout
-      - run: pwd
-      - run: ls -la
-      - run: 
+      - run:
+          name: terraform init
           path: /root/project/infrastructure
           command: terraform init -backend=true -backend-config="bucket=project-terraform-tfstate" -backend-config="key=$FIRST_ENVIRONMENT/terraform.tfstate" -force-copy -get=true -input=false -var="environment=$FIRST_ENVIRONMENT"
+
       - run: 
+          name: terraform destroy
           path: /root/project/infrastructure
           command: terraform destroy -auto-approve -var="environment=$FIRST_ENVIRONMENT"
 
