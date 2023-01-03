@@ -34,5 +34,5 @@ If you want to use this pipeline in your environment, you need the following:
 
 - create context 'terraform' in CircleCI with your AWS IAM user credentials;
 
-- enjoy using this pipeline!
+- enjoy using this pipeline!!
 ```
