@@ -54,7 +54,7 @@ jobs:
       - run: cd ./infrastructure && terraform init
       - run: go mod init "github.com/VitaliySynytskyi/webserver-ec2-module-terraform"
       - run: go mod tidy
-      - run: go test -v
+      - run: go test -v ./tests
 
   destroy:
     executor: terraform/default
