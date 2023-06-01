@@ -50,13 +50,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Initialize Go module
-          command: go mod init
-          working_directory: ~/src
-      - run:
           name: Run Tests
-          command: go test -v ./tests
-    working_directory: ~/src
+          command: go test -v -mod=readonly ./tests
+          working_directory: ~/src
 
   destroy:
     executor: terraform/default
