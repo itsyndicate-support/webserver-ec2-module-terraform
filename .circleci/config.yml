@@ -45,6 +45,7 @@ jobs:
 
   run-tests:
     executor: go/default
+    tag: '1.18'
     steps:
       - checkout
       - run:
