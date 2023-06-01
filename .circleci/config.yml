@@ -1,8 +1,19 @@
 version: 2.1
 orbs:
-  aws-cli: circleci/aws-cli@2.0
-  terraform: circleci/terraform@3.2.1
+  terraform: circleci/terraform@3.1
+  aws-cli: circleci/aws-cli@2.0.6
+  tfsec: mycodeself/tfsec@1.1.0
+  go: circleci/go@1.7.3
 jobs:
+  tfsec:
+    parameters:
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan: 
+          directory: ./infrastructure
+          exclude-checks: 'aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-add-description-to-security-group-rule'
+
   aws-cli-cred-setup:
     executor: aws-cli/default
     steps:
@@ -10,34 +21,54 @@ jobs:
           aws-access-key-id: AWS_ACCESS_KEY
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME
-workflows:
-  deploy_infrastructure:
-    jobs:
-      - aws-cli-cred-setup:
-          context: aws
-      - terraform/fmt:
-          checkout: true
-          context: terraform
+  init-validate-plan:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/init:
           path: infrastructure/
       - terraform/validate:
-          checkout: true
-          context: terraform
           path: infrastructure/
-          requires:
-            - terraform/fmt
       - terraform/plan:
-          checkout: true
-          context: terraform
           path: infrastructure/
-          persist-workspace: true
-          requires:
-            - terraform/validate
+    working_directory: ~/src
+  apply:
+    executor: terraform/default
+    steps:
+      - checkout
       - terraform/apply:
-          attach-workspace: true
-          context: terraform
           path: infrastructure/
-          filters:
-            branches:
-              only: main
+    working_directory: ~/src
+  destroy:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/destroy:
+          path: infrastructure/
+    working_directory: ~/src
+workflows:
+  deploy:
+    jobs:
+      - tfsec
+      - aws-cli-cred-setup:
+          context: aws
+      - init-validate-plan:
           requires:
-            - terraform/plan
+            - aws-cli-cred-setup
+      - hold:
+          type: approval
+          requires:
+            - init-validate-plan
+      - apply:
+          requires:
+            - hold
+      - terratest:
+          requires:
+            - apply
+      - hold2:
+          type: approval
+          requires:
+            - terratest
+      - destroy:
+          requires:
+            - hold2
