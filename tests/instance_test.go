@@ -1,64 +1,52 @@
 package test
 
 import (
-    "testing"
-    "github.com/stretchr/testify/assert"
-    "github.com/gruntwork-io/terratest/modules/terraform"
-    "github.com/gruntwork-io/terratest/modules/aws"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestTests(t *testing.T) {
-    t.Parallel()
+func TestInfrastructure(t *testing.T) {
+	t.Parallel()
 
-    terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-        TerraformDir: "/home/circleci/project/infrastructure",
-    })
+	terraformOptions := &terraform.Options{
+		TerraformDir: "./infrastructure",
+	}
 
-    testInstanceNames(t, terraformOptions)
-    testCidrBlocks(t, terraformOptions)
-    testDbInstances(t, terraformOptions)
-}
+	// Check the existence of EC2 instances
+	instanceIDs := []string{
+		terraform.Output(t, terraformOptions, "http_instance_id1"),
+		terraform.Output(t, terraformOptions, "http_instance_id2"),
+		terraform.Output(t, terraformOptions, "db_instance_id1"),
+		terraform.Output(t, terraformOptions, "db_instance_id2"),
+		terraform.Output(t, terraformOptions, "db_instance_id3"),
+	}
 
-func testInstanceNames(t *testing.T, terraformOptions *terraform.Options) {
-    instanceNames := []struct {
-        output   string
-        expected string
-    }{
-        {"http_instance_name1", "instance-http-1"},
-        {"http_instance_name2", "instance-http-2"},
-        {"db_instance_name1", "instance-db-1"},
-        {"db_instance_name2", "instance-db-2"},
-        {"db_instance_name3", "instance-db-3"},
-    }
+	for _, instanceID := range instanceIDs {
+		assert.True(t, aws.InstanceExists(t, instanceID, "eu-central-1"))
+	}
 
-    for _, tt := range instanceNames {
-        actualName := terraform.Output(t, terraformOptions, tt.output)
-        assert.Equal(t, tt.expected, actualName, "Instance name does not match.")
-    }
-}
+	// Check the existence of VPC and subnets with the correct CIDR blocks
+	vpcCidr := terraform.Output(t, terraformOptions, "vpc_cidr")
+	assert.Equal(t, "192.168.0.0/16", vpcCidr)
 
-func testCidrBlocks(t *testing.T, terraformOptions *terraform.Options) {
-    cidrBlocks := []struct {
-        output   string
-        expected string
-    }{
-        {"vpc_cidr", "192.168.0.0/16"},
-        {"http_subnet_cidr", "192.168.1.0/24"},
-        {"db_subnet_cidr", "192.168.2.0/24"},
-    }
+	httpSubnetCidr := terraform.Output(t, terraformOptions, "http_subnet_cidr")
+	assert.Equal(t, "192.168.1.0/24", httpSubnetCidr)
 
-    for _, tt := range cidrBlocks {
-        actualCidr := terraform.Output(t, terraformOptions, tt.output)
-        assert.Equal(t, tt.expected, actualCidr, "Cidr block does not match.")
-    }
-}
+	dbSubnetCidr := terraform.Output(t, terraformOptions, "db_subnet_cidr")
+	assert.Equal(t, "192.168.2.0/24", dbSubnetCidr)
 
-func testDbInstances(t *testing.T, terraformOptions *terraform.Options) {
-    dbInstances := []string{"db1_id", "db2_id", "db3_id"}
+	// Check the absence of access to the database from the internet
+	dbInstanceIDs := []string{
+		terraform.Output(t, terraformOptions, "db_instance_id1"),
+		terraform.Output(t, terraformOptions, "db_instance_id2"),
+		terraform.Output(t, terraformOptions, "db_instance_id3"),
+	}
 
-    for _, tt := range dbInstances {
-        db_id := terraform.Output(t, terraformOptions, tt)
-        db_public_ip := aws.GetPublicIpOfEc2Instance(t, db_id, "eu-central-1")
-        assert.Equal(t, "", db_public_ip)
-    }
+	for _, dbInstanceID := range dbInstanceIDs {
+		publicIP := aws.GetPublicIpOfEc2Instance(t, dbInstanceID, "eu-central-1")
+		assert.Empty(t, publicIP)
+	}
 }
