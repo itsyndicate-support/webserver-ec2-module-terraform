@@ -4,6 +4,7 @@ orbs:
   aws-cli: circleci/aws-cli@2.0.6
   tfsec: mycodeself/tfsec@1.1.0
   go: circleci/go@1.7.3
+
 jobs:
   tfsec:
     parameters:
@@ -21,6 +22,7 @@ jobs:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
           aws-region: AWS_REGION
+
   init-validate-plan:
     executor: terraform/default
     steps:
@@ -32,6 +34,7 @@ jobs:
       - terraform/plan:
           path: infrastructure/
     working_directory: ~/src
+
   apply:
     executor: terraform/default
     steps:
@@ -39,6 +42,7 @@ jobs:
       - terraform/apply:
           path: infrastructure/
     working_directory: ~/src
+
   destroy:
     executor: terraform/default
     steps:
@@ -56,17 +60,18 @@ workflows:
       - init-validate-plan:
           requires:
             - aws-cli-cred-setup
-      - hold:
+            - tfsec
+      - hold-before-apply:
           type: approval
           requires:
             - init-validate-plan
       - apply:
           requires:
-            - hold
-      - hold2:
+            - hold-before-apply
+      - hold-before-destroy:
           type: approval
           requires:
             - apply
       - destroy:
           requires:
-            - hold2
+            - hold-before-destroy
