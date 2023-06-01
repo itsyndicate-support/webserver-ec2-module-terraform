@@ -59,9 +59,10 @@ jobs:
           command: cd ./infrastructure && terraform init
       - run:
           name: Initialize Go module
-          command: |
-            
-            go mod tidy
+          command: go mod init github.com/VitaliySynytskyi/webserver-ec2-module-terraform
+      - run:
+          name: Run go mod tidy
+          command: go mod tidy
       - run:
           name: Run Tests
           command: go test -v -mod=readonly ./tests
