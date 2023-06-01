@@ -11,12 +11,10 @@ jobs:
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME
 workflows:
-  aws-cli:
+  deploy_infrastructure:
     jobs:
       - aws-cli-cred-setup:
           context: aws
-  deploy_infrastructure:
-    jobs:
       - terraform/fmt:
           checkout: true
           context: terraform
