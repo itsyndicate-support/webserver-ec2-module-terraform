@@ -15,7 +15,7 @@ func TestInfrastructure(t *testing.T) {
 		TerraformDir: "./infrastructure",
 	}
 
-	// Перевірка наявності інстансів EC2
+	// Check the existence of EC2 instances
 	instanceIDs := []string{
 		terraform.Output(t, terraformOptions, "http_instance_id1"),
 		terraform.Output(t, terraformOptions, "http_instance_id2"),
@@ -28,7 +28,7 @@ func TestInfrastructure(t *testing.T) {
 		assert.True(t, aws.InstanceExists(t, instanceID, "eu-central-1"))
 	}
 
-	// Перевірка наявності VPC і сабнетів з правильними CIDR-блоками
+	// Check the existence of VPC and subnets with the correct CIDR blocks
 	vpcCidr := terraform.Output(t, terraformOptions, "vpc_cidr")
 	assert.Equal(t, "192.168.0.0/16", vpcCidr)
 
@@ -38,7 +38,7 @@ func TestInfrastructure(t *testing.T) {
 	dbSubnetCidr := terraform.Output(t, terraformOptions, "db_subnet_cidr")
 	assert.Equal(t, "192.168.2.0/24", dbSubnetCidr)
 
-	// Перевірка відсутності доступу до бази даних з Інтернету
+	// Check the absence of access to the database from the internet
 	dbInstanceIDs := []string{
 		terraform.Output(t, terraformOptions, "db_instance_id1"),
 		terraform.Output(t, terraformOptions, "db_instance_id2"),
