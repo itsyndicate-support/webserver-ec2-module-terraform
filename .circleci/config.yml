@@ -48,15 +48,25 @@ jobs:
     working_directory: ~/src
 
 workflows:
-  version: 2
-  terraform_workflow:
+  deploy:
     jobs:
       - tfsec
-      - aws-cli-cred-setup
-      - init-validate-plan
-      - apply:
+      - aws-cli-cred-setup:
+          context: aws
+      - init-validate-plan:
+          requires:
+            - aws-cli-cred-setup
+      - hold:
+          type: approval
           requires:
             - init-validate-plan
-      - destroy:
+      - apply:
+          requires:
+            - hold
+      - hold2:
+          type: approval
           requires:
             - apply
+      - destroy:
+          requires:
+            - hold2
