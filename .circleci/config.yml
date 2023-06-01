@@ -1,0 +1,93 @@
+version: 2.1
+orbs:
+  terraform: circleci/terraform@3.1
+  aws-cli: circleci/aws-cli@2.0.6
+  tfsec: mycodeself/tfsec@1.1.0
+  go: circleci/go@1.7.3
+
+jobs:
+  tfsec:
+    parameters:
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan: 
+          directory: ./infrastructure
+          exclude-checks: 'aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-add-description-to-security-group-rule'
+
+  aws-cli-cred-setup:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+
+  init-validate-plan:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/init:
+          path: infrastructure/
+      - terraform/validate:
+          path: infrastructure/
+      - terraform/plan:
+          path: infrastructure/
+    working_directory: ~/src
+
+  apply:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/apply:
+          path: infrastructure/
+    working_directory: ~/src
+
+  run-tests:
+    executor:
+      name: go/default
+      tag: '1.18'
+    steps:
+      - checkout
+      - run: wget https://releases.hashicorp.com/terraform/1.3.5/terraform_1.3.5_linux_amd64.zip
+      - run: sudo unzip terraform_1.3.5_linux_amd64.zip -d /usr/local/bin
+      - run: cd ./infrastructure && terraform init
+      - run: go mod init "github.com/VitaliySynytskyi/webserver-ec2-module-terraform"
+      - run: go mod tidy
+      - run: go test -v ./tests
+
+  destroy:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/destroy:
+          path: infrastructure/
+    working_directory: ~/src
+
+workflows:
+  deploy:
+    jobs:
+      - tfsec
+      - aws-cli-cred-setup:
+          context: aws
+      - init-validate-plan:
+          requires:
+            - aws-cli-cred-setup
+            - tfsec
+      - hold-before-apply:
+          type: approval
+          requires:
+            - init-validate-plan
+      - apply:
+          requires:
+            - hold-before-apply
+      - run-tests:
+          requires:
+            - apply
+      - hold-before-destroy:
+          type: approval
+          requires:
+            - apply
+      - destroy:
+          requires:
+            - hold-before-destroy
