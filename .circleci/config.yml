@@ -43,6 +43,14 @@ jobs:
           path: infrastructure/
     working_directory: ~/src
 
+  run-tests:
+    executor: go/default
+    steps:
+      - checkout
+      - run:
+          name: Run Tests
+          command: go test -v ./tests
+
   destroy:
     executor: terraform/default
     steps:
@@ -68,6 +76,9 @@ workflows:
       - apply:
           requires:
             - hold-before-apply
+      - run-tests:
+          requires:
+            - apply
       - hold-before-destroy:
           type: approval
           requires:
