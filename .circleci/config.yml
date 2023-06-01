@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@2.0
+  terraform: circleci/terraform@3.2.1
 jobs:
   aws-cli-cred-setup:
     executor: aws-cli/default
@@ -14,3 +15,31 @@ workflows:
     jobs:
       - aws-cli-cred-setup:
           context: aws
+  deploy_infrastructure:
+    jobs:
+      - terraform/fmt:
+          checkout: true
+          context: terraform
+          path: infrastructure/
+      - terraform/validate:
+          checkout: true
+          context: terraform
+          path: infrastructure/
+          requires:
+            - terraform/fmt
+      - terraform/plan:
+          checkout: true
+          context: terraform
+          path: infrastructure/
+          persist-workspace: true
+          requires:
+            - terraform/validate
+      - terraform/apply:
+          attach-workspace: true
+          context: terraform
+          path: infrastructure/
+          filters:
+            branches:
+              only: main
+          requires:
+            - terraform/plan
