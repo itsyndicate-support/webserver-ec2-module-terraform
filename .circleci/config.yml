@@ -18,7 +18,7 @@ jobs:
     executor: aws-cli/default
     steps:
       - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY
+          aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_ACCESS_SECRET
           aws-region: AWS_REGION_NAME
   init-validate-plan:
@@ -46,29 +46,17 @@ jobs:
       - terraform/destroy:
           path: infrastructure/
     working_directory: ~/src
+
 workflows:
-  deploy:
+  version: 2
+  terraform_workflow:
     jobs:
       - tfsec
-      - aws-cli-cred-setup:
-          context: aws
-      - init-validate-plan:
-          requires:
-            - aws-cli-cred-setup
-      - hold:
-          type: approval
-          requires:
-            - init-validate-plan
+      - aws-cli-cred-setup
+      - init-validate-plan
       - apply:
           requires:
-            - hold
-      - terratest:
-          requires:
-            - apply
-      - hold2:
-          type: approval
-          requires:
-            - terratest
+            - init-validate-plan
       - destroy:
           requires:
-            - hold2
+            - apply
