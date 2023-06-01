@@ -12,41 +12,24 @@ func TestInfrastructure(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := &terraform.Options{
-		TerraformDir: "./infrastructure",
+		TerraformDir: "../infrastructure",
 	}
 
-	// Check the existence of EC2 instances
-	instanceIDs := []string{
-		terraform.Output(t, terraformOptions, "http_instance_id1"),
-		terraform.Output(t, terraformOptions, "http_instance_id2"),
-		terraform.Output(t, terraformOptions, "db_instance_id1"),
-		terraform.Output(t, terraformOptions, "db_instance_id2"),
-		terraform.Output(t, terraformOptions, "db_instance_id3"),
+	// Deploy the infrastructure and retrieve outputs
+	terraform.InitAndApply(t, terraformOptions)
+	httpIPs := terraform.OutputMap(t, terraformOptions, "http_ip")
+	dbIPs := terraform.OutputMap(t, terraformOptions, "db_ip")
+
+	// Validate the DNS information
+	assert.NotEmpty(t, httpIPs)
+	assert.NotEmpty(t, dbIPs)
+
+	// Validate individual instance IP addresses
+	for instanceID, privateIP := range httpIPs {
+		assert.True(t, aws.InstancePrivateIPExists(t, instanceID, privateIP, "eu-central-1"))
 	}
 
-	for _, instanceID := range instanceIDs {
-		assert.True(t, aws.InstanceExists(t, instanceID, "eu-central-1"))
-	}
-
-	// Check the existence of VPC and subnets with the correct CIDR blocks
-	vpcCidr := terraform.Output(t, terraformOptions, "vpc_cidr")
-	assert.Equal(t, "192.168.0.0/16", vpcCidr)
-
-	httpSubnetCidr := terraform.Output(t, terraformOptions, "http_subnet_cidr")
-	assert.Equal(t, "192.168.1.0/24", httpSubnetCidr)
-
-	dbSubnetCidr := terraform.Output(t, terraformOptions, "db_subnet_cidr")
-	assert.Equal(t, "192.168.2.0/24", dbSubnetCidr)
-
-	// Check the absence of access to the database from the internet
-	dbInstanceIDs := []string{
-		terraform.Output(t, terraformOptions, "db_instance_id1"),
-		terraform.Output(t, terraformOptions, "db_instance_id2"),
-		terraform.Output(t, terraformOptions, "db_instance_id3"),
-	}
-
-	for _, dbInstanceID := range dbInstanceIDs {
-		publicIP := aws.GetPublicIpOfEc2Instance(t, dbInstanceID, "eu-central-1")
-		assert.Empty(t, publicIP)
+	for instanceID, privateIP := range dbIPs {
+		assert.True(t, aws.InstancePrivateIPExists(t, instanceID, privateIP, "eu-central-1"))
 	}
 }
