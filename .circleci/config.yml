@@ -44,8 +44,9 @@ jobs:
     working_directory: ~/src
 
   run-tests:
-    executor: go/default
-    tag: '1.18'
+    executor: 
+      name: go/default
+      tag: '1.18'
     steps:
       - checkout
       - run:
