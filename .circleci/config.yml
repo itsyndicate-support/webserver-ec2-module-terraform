@@ -50,6 +50,7 @@ jobs:
       - run:
           name: Run Tests
           command: go test -v ./tests
+    working_directory: ~/src
 
   destroy:
     executor: terraform/default
