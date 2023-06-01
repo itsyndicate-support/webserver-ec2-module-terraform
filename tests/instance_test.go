@@ -12,7 +12,7 @@ func TestInfrastructure(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := &terraform.Options{
-		TerraformDir: "./infrastructure",
+		TerraformDir: "/home/circleci/project/infrastructure",
 	}
 
 	// Check the existence of EC2 instances
