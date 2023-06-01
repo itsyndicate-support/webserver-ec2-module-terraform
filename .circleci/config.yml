@@ -20,7 +20,6 @@ jobs:
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_ACCESS_SECRET
-          aws-region: AWS_REGION_NAME
   init-validate-plan:
     executor: terraform/default
     steps:
