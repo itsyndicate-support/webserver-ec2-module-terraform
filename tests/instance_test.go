@@ -17,15 +17,15 @@ func TestHTTPInstances(t *testing.T) {
 
 	terraform.InitAndApply(t, terraformOptions)
 
-	instanceNames := []string{"instance-http-1", "instance-http-2"} // Замініть ці значення на імена HTTP інстансів, визначені в змінній "http_instance_names"
+	instanceNames := []string{"instance-http-1", "instance-http-2"} 
 
 	for _, instanceName := range instanceNames {
 		// Перевірка створення інстансу EC2
-		instance := aws.GetEc2Instance(t, instanceName, "eu-central-1")
+		instance := aws.GetEc2InstanceById(t, instanceName, "us-east-1")
 		assert.NotNil(t, instance)
 
 		// Перевірка наявності присвоєного плаваючого IP
-		eip := aws.GetEipForEc2Instance(t, instance.ID, "eu-central-1")
+		eip := aws.GetEipForEc2InstanceId(t, instance.ID, "us-east-1")
 		assert.NotNil(t, eip)
 	}
 }
