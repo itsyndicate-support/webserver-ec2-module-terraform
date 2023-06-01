@@ -11,7 +11,7 @@ func TestTests(t *testing.T) {
     t.Parallel()
 
     terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-        TerraformDir: "./infrastructure",
+        TerraformDir: "/home/circleci/project/infrastructure",
     })
 
     testInstanceNames(t, terraformOptions)
