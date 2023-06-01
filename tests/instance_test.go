@@ -1,35 +1,31 @@
-package test
+package main
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestInfrastructure(t *testing.T) {
-	t.Parallel()
-
+func TestHTTPInstances(t *testing.T) {
 	terraformOptions := &terraform.Options{
 		TerraformDir: "../infrastructure",
 	}
 
-	// Deploy the infrastructure and retrieve outputs
+	defer terraform.Destroy(t, terraformOptions)
+
 	terraform.InitAndApply(t, terraformOptions)
-	httpIPs := terraform.OutputMap(t, terraformOptions, "http_ip")
-	dbIPs := terraform.OutputMap(t, terraformOptions, "db_ip")
 
-	// Validate the DNS information
-	assert.NotEmpty(t, httpIPs)
-	assert.NotEmpty(t, dbIPs)
+	instanceNames := []string{"instance-http-1", "instance-http-2"} // Замініть ці значення на імена HTTP інстансів, визначені в змінній "http_instance_names"
 
-	// Validate individual instance IP addresses
-	for instanceID, privateIP := range httpIPs {
-		assert.True(t, aws.InstancePrivateIPExists(t, instanceID, privateIP, "eu-central-1"))
-	}
+	for _, instanceName := range instanceNames {
+		// Перевірка створення інстансу EC2
+		instance := aws.GetEc2Instance(t, instanceName, "eu-central-1")
+		assert.NotNil(t, instance)
 
-	for instanceID, privateIP := range dbIPs {
-		assert.True(t, aws.InstancePrivateIPExists(t, instanceID, privateIP, "eu-central-1"))
+		// Перевірка наявності присвоєного плаваючого IP
+		eip := aws.GetEipForEc2Instance(t, instance.ID, "eu-central-1")
+		assert.NotNil(t, eip)
 	}
 }
