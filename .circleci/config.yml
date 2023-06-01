@@ -60,7 +60,7 @@ workflows:
       - init-validate-plan:
           requires:
             - aws-cli-cred-setup
-            # - tfsec
+            - tfsec
       - hold-before-apply:
           type: approval
           requires:
