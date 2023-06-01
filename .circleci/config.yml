@@ -56,7 +56,6 @@ jobs:
       - run: go mod tidy
       - run: go test -v
 
-
   destroy:
     executor: terraform/default
     steps:
