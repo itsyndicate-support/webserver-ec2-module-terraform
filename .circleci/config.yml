@@ -65,29 +65,105 @@ jobs:
     working_directory: ~/src
 
 workflows:
-  deploy:
+  version: 2
+  deploy-test:
     jobs:
-      - tfsec
+      - tfsec:
+          filters:
+            branches:
+              only: test
       - aws-cli-cred-setup:
           context: aws
+          filters:
+            branches:
+              only: test
       - init-validate-plan:
           requires:
             - aws-cli-cred-setup
             - tfsec
+          filters:
+            branches:
+              only: test
       - hold-before-apply:
           type: approval
           requires:
             - init-validate-plan
+          filters:
+            branches:
+              only: test
       - apply:
           requires:
             - hold-before-apply
+          filters:
+            branches:
+              only: test
       - run-tests:
           requires:
             - apply
+          filters:
+            branches:
+              only: test
       - hold-before-destroy:
           type: approval
           requires:
             - apply
+          filters:
+            branches:
+              only: test
       - destroy:
           requires:
             - hold-before-destroy
+          filters:
+            branches:
+              only: test
+
+  deploy-prod:
+    jobs:
+      - tfsec:
+          filters:
+            branches:
+              only: prod
+      - aws-cli-cred-setup:
+          context: aws
+          filters:
+            branches:
+              only: prod
+      - init-validate-plan:
+          requires:
+            - aws-cli-cred-setup
+            - tfsec
+          filters:
+            branches:
+              only: prod
+      - hold-before-apply:
+          type: approval
+          requires:
+            - init-validate-plan
+          filters:
+            branches:
+              only: prod
+      - apply:
+          requires:
+            - hold-before-apply
+          filters:
+            branches:
+              only: prod
+      - run-tests:
+          requires:
+            - apply
+          filters:
+            branches:
+              only: prod
+      - hold-before-destroy:
+          type: approval
+          requires:
+            - apply
+          filters:
+            branches:
+              only: prod
+      - destroy:
+          requires:
+            - hold-before-destroy
+          filters:
+            branches:
+              only: prod
