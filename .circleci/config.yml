@@ -66,11 +66,17 @@ jobs:
 
 workflows:
   version: 2
-  deploy:
+  deploy-test:
     jobs:
-      - tfsec
+      - tfsec:
+          filters:
+            branches:
+              only: test
       - aws-cli-cred-setup:
           context: aws
+          filters:
+            branches:
+              only: test
       - init-validate-plan:
           requires:
             - aws-cli-cred-setup
@@ -113,9 +119,15 @@ workflows:
 
   deploy-prod:
     jobs:
-      - tfsec
+      - tfsec:
+          filters:
+            branches:
+              only: prod
       - aws-cli-cred-setup:
           context: aws
+          filters:
+            branches:
+              only: prod
       - init-validate-plan:
           requires:
             - aws-cli-cred-setup
