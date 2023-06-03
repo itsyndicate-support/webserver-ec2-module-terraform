@@ -65,3 +65,12 @@ output "db2_id" {
 output "db3_id" {
   value = aws_instance.db["instance-db-3"].id
 }
+
+// Http instance IDs
+output "http1_id" {
+  value = aws_instance.http["instance-http-1"].id
+}
+
+output "http2_id" {
+  value = aws_instance.http["instance-http-2"].id
+}
