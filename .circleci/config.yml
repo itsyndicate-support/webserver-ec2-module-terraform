@@ -33,7 +33,7 @@ jobs:
           path: infrastructure/
       - terraform/plan:
           path: infrastructure/
-          var: http_subnet=$SUBNETNAME
+          var: network_http=$SUBNETNAME
     working_directory: ~/src
 
   apply:
