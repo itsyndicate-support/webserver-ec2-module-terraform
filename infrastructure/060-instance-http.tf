@@ -14,6 +14,7 @@ resource "aws_instance" "http" {
   user_data = file("scripts/first-boot-http.sh")
   tags = {
     Name = each.key
+    env  = var.env
   }
 }
 

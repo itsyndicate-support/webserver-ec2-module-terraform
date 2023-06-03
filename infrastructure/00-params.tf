@@ -15,15 +15,16 @@ variable "network_http" {
   }
 }
 
-variable "http_subnet" {
-  type    = string
-  default = "subnet_http"
-}
-
 # Set number of instance
 variable "http_instance_names" {
   type    = set(string)
   default = ["instance-http-1", "instance-http-2"]
+}
+
+
+variable "env" {
+  type    = string
+  default = "deploy"
 }
 
 #### DB PARAMS
@@ -40,3 +41,4 @@ variable "db_instance_names" {
   type    = set(string)
   default = ["instance-db-1", "instance-db-2", "instance-db-3"]
 }
+
