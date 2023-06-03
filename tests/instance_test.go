@@ -24,15 +24,15 @@ func testInstanceExistence(t *testing.T, terraformOptions *terraform.Options) {
 	instanceIDs := []string{"http1_id", "http2_id"}
 
 	for _, instanceID := range instanceIDs {
-		exists := terraform.ResourceExists(t, terraformOptions, instanceID)
-		assert.True(t, exists, "Instance does not exist: %s", instanceID)
+		_, ok := terraform.OutputMap(t, terraformOptions, instanceID)
+		assert.True(t, ok, "Instance does not exist: %s", instanceID)
 	}
 
 	dbInstances := []string{"db1_id", "db2_id", "db3_id"}
 
 	for _, dbInstance := range dbInstances {
-		exists := terraform.ResourceExists(t, terraformOptions, dbInstance)
-		assert.True(t, exists, "Database instance does not exist: %s", dbInstance)
+		_, ok := terraform.OutputMap(t, terraformOptions, dbInstance)
+		assert.True(t, ok, "Database instance does not exist: %s", dbInstance)
 	}
 }
 
