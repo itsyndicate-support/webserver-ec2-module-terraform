@@ -34,8 +34,7 @@ jobs:
       - terraform/plan:
           path: infrastructure/
           var: 
-            "var.http_instance_names": "${jsonencode(http_instance_names)}"
-            "var.db_instance_names": "${jsonencode(db_instance_names)}"
+            http_instance_names=$http_instance_names
     working_directory: ~/src
 
   apply:
@@ -45,8 +44,7 @@ jobs:
       - terraform/apply:
           path: infrastructure/
           var: 
-            "var.http_instance_names": "${jsonencode(http_instance_names)}"
-            "var.db_instance_names": "${jsonencode(db_instance_names)}"
+            http_instance_names=$http_instance_names
     working_directory: ~/src
 
   run-tests:
@@ -69,8 +67,7 @@ jobs:
       - terraform/destroy:
           path: infrastructure/
           var: 
-            "var.http_instance_names": "${jsonencode(http_instance_names)}"
-            "var.db_instance_names": "${jsonencode(db_instance_names)}"
+            http_instance_names=$http_instance_names
     working_directory: ~/src
 
 workflows:
