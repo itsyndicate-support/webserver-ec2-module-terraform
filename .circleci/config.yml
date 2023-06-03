@@ -34,7 +34,7 @@ jobs:
       - terraform/plan:
           path: infrastructure/
           var: 
-            http_instance_names: $http_instance_names
+            http_instance_names: "$http_instance_names"
     working_directory: ~/src
 
   apply:
