@@ -21,7 +21,7 @@ func TestTests(t *testing.T) {
 }
 
 func testInstanceExistence(t *testing.T, terraformOptions *terraform.Options) {
-    instanceIDs := []string{"instance_id1", "instance_id2"}
+    instanceIDs := []string{"http1_id", "http2_id"}
 
     for _, instanceID := range instanceIDs {
         exists := terraform.ResourceExists(t, terraformOptions, instanceID)
