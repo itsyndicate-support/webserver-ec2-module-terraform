@@ -33,8 +33,7 @@ jobs:
           path: infrastructure/
       - terraform/plan:
           path: infrastructure/
-          var: 
-            http_instance_names=$http_instance_names
+          var: http_instance_names=$http_instance_names
     working_directory: ~/src
 
   apply:
@@ -43,8 +42,7 @@ jobs:
       - checkout
       - terraform/apply:
           path: infrastructure/
-          var: 
-            http_instance_names=$http_instance_names
+          var: http_instance_names=$http_instance_names
     working_directory: ~/src
 
   run-tests:
@@ -66,8 +64,7 @@ jobs:
       - checkout
       - terraform/destroy:
           path: infrastructure/
-          var: 
-            http_instance_names=$http_instance_names
+          var: http_instance_names=$http_instance_names
     working_directory: ~/src
 
 workflows:
