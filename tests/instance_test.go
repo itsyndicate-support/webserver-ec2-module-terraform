@@ -15,21 +15,25 @@ func TestTests(t *testing.T) {
         TerraformDir: "/home/circleci/project/infrastructure",
     })
 
-    testInstanceNames(t, terraformOptions)
+    testInstanceExistence(t, terraformOptions)
     testCidrBlocks(t, terraformOptions)
     testDbInstances(t, terraformOptions)
 }
 
-func testInstanceCreation(t *testing.T, terraformOptions *terraform.Options) {
-    // Перевірка створення інстансів EC2
-    ec2ResourceType := "aws_instance"
-    ec2Count := terraform.GetResourceCount(t, terraformOptions, ec2ResourceType)
-    assert.Greater(t, ec2Count, 0, "No EC2 instances were created.")
+func testInstanceExistence(t *testing.T, terraformOptions *terraform.Options) {
+    instanceIDs := []string{"instance_id1", "instance_id2"}
 
-    // Перевірка створення баз даних
-    dbResourceType := "aws_db_instance"
-    dbCount := terraform.GetResourceCount(t, terraformOptions, dbResourceType)
-    assert.Greater(t, dbCount, 0, "No database instances were created.")
+    for _, instanceID := range instanceIDs {
+        exists := terraform.ResourceExists(t, terraformOptions, instanceID)
+        assert.True(t, exists, "Instance does not exist: %s", instanceID)
+    }
+
+    dbInstances := []string{"db1_id", "db2_id", "db3_id"}
+
+    for _, dbInstance := range dbInstances {
+        exists := terraform.ResourceExists(t, terraformOptions, dbInstance)
+        assert.True(t, exists, "Database instance does not exist: %s", dbInstance)
+    }
 }
 
 
