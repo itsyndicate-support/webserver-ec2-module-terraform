@@ -21,6 +21,12 @@ variable "http_instance_names" {
   default = ["instance-http-1", "instance-http-2"]
 }
 
+
+variable "env" {
+  type    = string
+  default = "deploy"
+}
+
 #### DB PARAMS
 variable "network_db" {
   type = map(string)

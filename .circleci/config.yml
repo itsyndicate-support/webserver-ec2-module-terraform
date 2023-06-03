@@ -33,6 +33,7 @@ jobs:
           path: infrastructure/
       - terraform/plan:
           path: infrastructure/
+          var: env=$env
     working_directory: ~/src
 
   apply:
@@ -41,6 +42,7 @@ jobs:
       - checkout
       - terraform/apply:
           path: infrastructure/
+          var: env=$env
     working_directory: ~/src
 
   run-tests:
@@ -62,108 +64,57 @@ jobs:
       - checkout
       - terraform/destroy:
           path: infrastructure/
+          var: env=$env
     working_directory: ~/src
 
 workflows:
-  version: 2
-  deploy-test:
+  deploy:
     jobs:
       - tfsec:
+          context: "<< pipeline.git.branch >>"
           filters:
             branches:
-              only: test
+              only: 
+                - test
+                - prod
       - aws-cli-cred-setup:
           context: aws
+      - init-validate-plan:
+          context: "<< pipeline.git.branch >>"
           filters:
             branches:
-              only: test
-      - init-validate-plan:
+              only: 
+                - test
+                - prod
           requires:
             - aws-cli-cred-setup
             - tfsec
-          filters:
-            branches:
-              only: test
       - hold-before-apply:
           type: approval
           requires:
             - init-validate-plan
+      - apply:
+          context: "<< pipeline.git.branch >>"
           filters:
             branches:
-              only: test
-      - apply:
+              only: 
+                - test
+                - prod
           requires:
             - hold-before-apply
-          filters:
-            branches:
-              only: test
       - run-tests:
           requires:
             - apply
-          filters:
-            branches:
-              only: test
       - hold-before-destroy:
           type: approval
           requires:
             - apply
+      - destroy:
+          context: "<< pipeline.git.branch >>"
           filters:
             branches:
-              only: test
-      - destroy:
+              only: 
+                - test
+                - prod
           requires:
             - hold-before-destroy
-          filters:
-            branches:
-              only: test
-
-  deploy-prod:
-    jobs:
-      - tfsec:
-          filters:
-            branches:
-              only: prod
-      - aws-cli-cred-setup:
-          context: aws
-          filters:
-            branches:
-              only: prod
-      - init-validate-plan:
-          requires:
-            - aws-cli-cred-setup
-            - tfsec
-          filters:
-            branches:
-              only: prod
-      - hold-before-apply:
-          type: approval
-          requires:
-            - init-validate-plan
-          filters:
-            branches:
-              only: prod
-      - apply:
-          requires:
-            - hold-before-apply
-          filters:
-            branches:
-              only: prod
-      - run-tests:
-          requires:
-            - apply
-          filters:
-            branches:
-              only: prod
-      - hold-before-destroy:
-          type: approval
-          requires:
-            - apply
-          filters:
-            branches:
-              only: prod
-      - destroy:
-          requires:
-            - hold-before-destroy
-          filters:
-            branches:
-              only: prod
