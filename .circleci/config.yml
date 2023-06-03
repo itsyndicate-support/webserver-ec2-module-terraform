@@ -31,12 +31,9 @@ jobs:
           path: infrastructure/
       - terraform/validate:
           path: infrastructure/
-      - run:
-          name: "echo environment variables from org-global context"
-          command: echo $http_instance_names
       - terraform/plan:
           path: infrastructure/
-          var: http_instance_names=$http_instance_names
+          var: http_instance_names='["test-instance-db-1", "test-instance-db-2", "test-instance-db-3"]'
     working_directory: ~/src
 
   apply:
