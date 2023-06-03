@@ -13,8 +13,7 @@ resource "aws_instance" "db" {
   subnet_id = aws_subnet.db.id
   user_data = file("scripts/first-boot-db.sh")
   tags = {
-    Name = each.key
-    env  = var.env
+    Name = "${var.env}${each.key}"
   }
 }
 
