@@ -24,15 +24,15 @@ func testInstanceExistence(t *testing.T, terraformOptions *terraform.Options) {
 	instanceIDs := []string{"http1_id", "http2_id"}
 
 	for _, instanceID := range instanceIDs {
-		_, ok := terraform.OutputMap(t, terraformOptions, instanceID)
-		assert.True(t, ok, "Instance does not exist: %s", instanceID)
+		instanceIDValue := terraform.Output(t, terraformOptions, instanceID)
+		assert.NotEmpty(t, instanceIDValue, "Instance does not exist: %s", instanceID)
 	}
 
 	dbInstances := []string{"db1_id", "db2_id", "db3_id"}
 
 	for _, dbInstance := range dbInstances {
-		_, ok := terraform.OutputMap(t, terraformOptions, dbInstance)
-		assert.True(t, ok, "Database instance does not exist: %s", dbInstance)
+		dbIDValue := terraform.Output(t, terraformOptions, dbInstance)
+		assert.NotEmpty(t, dbIDValue, "Database instance does not exist: %s", dbInstance)
 	}
 }
 
@@ -56,8 +56,8 @@ func testDbInstances(t *testing.T, terraformOptions *terraform.Options) {
 	dbInstances := []string{"db1_id", "db2_id", "db3_id"}
 
 	for _, dbInstance := range dbInstances {
-		dbID := terraform.Output(t, terraformOptions, dbInstance)
-		dbPublicIP := aws.GetPublicIpOfEc2Instance(t, dbID, "eu-central-1")
+		dbIDValue := terraform.Output(t, terraformOptions, dbInstance)
+		dbPublicIP := aws.GetPublicIpOfEc2Instance(t, dbIDValue, "eu-central-1")
 		assert.Equal(t, "", dbPublicIP)
 	}
 }
