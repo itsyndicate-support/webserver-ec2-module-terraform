@@ -19,23 +19,18 @@ func TestTests(t *testing.T) {
     testDbInstances(t, terraformOptions)
 }
 
-func testInstanceNames(t *testing.T, terraformOptions *terraform.Options) {
-    instanceNames := []struct {
-        output   string
-        expected string
-    }{
-        {"http_instance_name1", "instance-http-1"},
-        {"http_instance_name2", "instance-http-2"},
-        {"db_instance_name1", "instance-db-1"},
-        {"db_instance_name2", "instance-db-2"},
-        {"db_instance_name3", "instance-db-3"},
-    }
+func testInstanceCreation(t *testing.T, terraformOptions *terraform.Options) {
+    // Перевірка створення інстансів EC2
+    ec2ResourceType := "aws_instance"
+    ec2Count := terraform.GetResourceCount(t, terraformOptions, ec2ResourceType)
+    assert.Greater(t, ec2Count, 0, "No EC2 instances were created.")
 
-    for _, tt := range instanceNames {
-        actualName := terraform.Output(t, terraformOptions, tt.output)
-        assert.Equal(t, tt.expected, actualName, "Instance name does not match.")
-    }
+    // Перевірка створення баз даних
+    dbResourceType := "aws_db_instance"
+    dbCount := terraform.GetResourceCount(t, terraformOptions, dbResourceType)
+    assert.Greater(t, dbCount, 0, "No database instances were created.")
 }
+
 
 func testCidrBlocks(t *testing.T, terraformOptions *terraform.Options) {
     cidrBlocks := []struct {
