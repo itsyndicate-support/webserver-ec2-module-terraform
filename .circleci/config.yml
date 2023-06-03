@@ -33,7 +33,10 @@ jobs:
           path: infrastructure/
       - terraform/plan:
           path: infrastructure/
-          var: http_instance_names=$http_instance_names
+          parameters:
+            var:
+              http_instance_names: $http_instance_names
+          additional_flags: -chdir=infrastructure/
     working_directory: ~/src
 
   apply:
