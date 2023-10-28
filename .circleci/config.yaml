@@ -1,0 +1,52 @@
+version: '2.1'
+orbs:
+  tfsec: mycodeself/tfsec@1.1.0
+  terraform: circleci/terraform@3.2.1
+jobs:
+  tfsec-tests:
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan:
+          directory: infrastructure
+          exclude-checks: GEN001,GCP001,GCP002
+  terraform-setup:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/init
+      - terraform/validate
+      - terraform/plan
+    working_directory: infrastructure
+  terraform-apply:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/apply
+    working_directory: infrastructure
+  infrastructure-test:
+    docker:
+      - image: golang:1.21
+    steps:
+      - run: go test
+      - attach_workspace:
+          at: test
+  terraform-destroy:
+    executor: terraform/default
+    steps:
+      - checkout
+      - terraform/destroy
+    working_directory: infrastructure
+  
+workflows:
+  analyze-tf-code:
+    jobs:
+      - tfsec-tests
+      - terraform-setup
+      - hold:
+          type: approval
+      - terraform-apply
+      - infrastructure-test
+      - hold:
+          type: approval
+      - terraform-destroy

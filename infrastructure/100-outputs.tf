@@ -13,3 +13,16 @@ output "db_ip" {
     instance.id => instance.private_ip
   }
 }
+
+output "http_subnet" {
+  value = aws_subnet.http.id
+}
+
+output "db_subnet" {
+  value = aws_subnet.db.id
+}
+
+output "vpc" {
+  value = aws_vpc.terraform.id
+}
+
