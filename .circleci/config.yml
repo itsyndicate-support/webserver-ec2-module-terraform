@@ -19,8 +19,7 @@ jobs:
   terraform-setup:
     executor: terraform/default
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
       - run: ls -R
       - terraform/init
       - terraform/validate
