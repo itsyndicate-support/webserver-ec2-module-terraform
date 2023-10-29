@@ -6,22 +6,18 @@ jobs:
   tfsec-tests:
     executor: tfsec/default
     steps:
-      - checkout
-      - run: pwd
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - ./test
-            - ./infrastructure
-      - run: ls -R
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-setup:
     executor: terraform/default
     steps:
-      - attach_workspace:
-          at: ~/project
+      - checkout
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./test
+            - ./infrastructure
       - run: ls -R
       - terraform/init
       - terraform/validate
