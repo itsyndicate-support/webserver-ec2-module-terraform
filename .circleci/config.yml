@@ -7,8 +7,9 @@ jobs:
     executor: tfsec/default
     steps:
       - checkout
+      - run: pwd
       - persist_to_workspace:
-          root: /workspace
+          root: /
           paths:
             - ./test
             - ./infrastructure
