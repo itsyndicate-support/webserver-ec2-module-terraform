@@ -1,4 +1,4 @@
-version: '2.1'
+version: 2.1
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
   terraform: circleci/terraform@3.2.1
