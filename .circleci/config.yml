@@ -7,7 +7,11 @@ jobs:
     executor: tfsec/default
     steps:
       - checkout
-      - persist_to_workspace
+      - persist_to_workspace:
+          root: .
+          paths:
+            - infrastructure
+            - test
       - run: ls -R
       - tfsec/scan:
           directory: infrastructure
@@ -15,7 +19,8 @@ jobs:
   terraform-setup:
     executor: terraform/default
     steps:
-      - attach_workspace
+      - attach_workspace:
+          at: .
       - run: ls -R
       - terraform/init
       - terraform/validate
@@ -24,21 +29,25 @@ jobs:
     executor: terraform/default
     steps:
       - attach_workspace:
-          at: infrastructure
+          at: .
       - run: ls -R
       - terraform/apply
+    working_directory: infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
-      - attach_workspace
+      - attach_workspace:
+          at: .
       - run: go test
     working_directory: test
   terraform-destroy:
     executor: terraform/default
     steps:
-      - attach_workspace
+      - attach_workspace:
+          at: .
       - terraform/destroy
+    working_directory: infrastructure
   
 workflows:
   tf-test-deploy:
