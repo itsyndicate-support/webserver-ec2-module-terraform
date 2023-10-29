@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run: pwd
       - persist_to_workspace:
-          root: /
+          root: ~/project
           paths:
             - ./test
             - ./infrastructure
@@ -21,35 +21,35 @@ jobs:
     executor: terraform/default
     steps:
       - attach_workspace:
-          at: /workspace
+          at: ~/project
       - run: ls -R
       - terraform/init
       - terraform/validate
       - terraform/plan
-    working_directory: /workspace/infrastructure
+    working_directory: ~/project/infrastructure
   terraform-apply:
     executor: terraform/default
     steps:
       - attach_workspace:
-          at: /workspace
+          at: ~/project
       - run: ls -R
       - terraform/apply
-    working_directory: /workspace/infrastructure
+    working_directory: ~/project/infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
       - attach_workspace:
-          at: /workspace
+          at: ~/project
       - run: go test
-    working_directory: /workspace/test
+    working_directory: ~/project/test
   terraform-destroy:
     executor: terraform/default
     steps:
       - attach_workspace:
-          at: /workspace
+          at: ~/project
       - terraform/destroy
-    working_directory: /workspace/infrastructure
+    working_directory: ~/project/infrastructure
   
 workflows:
   tf-test-deploy:
