@@ -6,6 +6,7 @@ jobs:
   tfsec-tests:
     executor: tfsec/default
     steps:
+      - checkout
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
@@ -19,10 +20,12 @@ jobs:
             - ./test
             - ./infrastructure
       - run: ls -R
-      - terraform/init
-      - terraform/validate
-      - terraform/plan
-    working_directory: ~/project/infrastructure
+      - terraform/init:
+          path: ./infrastructure
+      - terraform/validate:
+          path: ./infrastructure
+      - terraform/plan:
+          path: ./infrastructure
   terraform-apply:
     executor: terraform/default
     steps:
