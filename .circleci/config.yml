@@ -14,7 +14,6 @@ jobs:
   terraform-setup:
     executor: terraform/default
     steps:
-      - persist_to_workspace
       - terraform/init
       - terraform/validate
       - terraform/plan
@@ -22,7 +21,6 @@ jobs:
   terraform-apply:
     executor: terraform/default
     steps:
-      - attach_workspace
       - terraform/apply
     working_directory: infrastructure
   infrastructure-test:
@@ -35,7 +33,6 @@ jobs:
   terraform-destroy:
     executor: terraform/default
     steps:
-      - attach_workspace
       - terraform/destroy
     working_directory: infrastructure
   
