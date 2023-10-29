@@ -39,27 +39,27 @@ jobs:
     working_directory: infrastructure
   
 workflows:
-  analyze-tf-code:
+  tf-test-deploy:
     jobs:
       - tfsec-tests
-      - terraform-setup
+      - terraform-setup:
           requires:
             - tfsec-tests
-      - hold:
+      - hold1:
           type: approval
           requires:
             - tfsec-tests
             - terraform-setup
-      - terraform-apply
+      - terraform-apply:
           requires:
-            - hold
-      - infrastructure-test
+            - hold1
+      - infrastructure-test:
           requires:
             - terraform-apply
-      - hold:
+      - hold2:
           type: approval
           requires:
             - infrastructure-test
-      - terraform-destroy
+      - terraform-destroy:
           requires:
-            - hold
+            - hold2
