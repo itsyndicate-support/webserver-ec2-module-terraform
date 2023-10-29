@@ -43,10 +43,23 @@ workflows:
     jobs:
       - tfsec-tests
       - terraform-setup
+        requires:
+            - tfsec-tests
       - hold:
           type: approval
+          requires:
+            - tfsec-tests
+            - terraform-setup
       - terraform-apply
+          requires:
+            - hold
       - infrastructure-test
+          requires:
+            - terraform-apply
       - hold:
           type: approval
+          requires:
+            - infrastructure-test
       - terraform-destroy
+          requires:
+            - hold
