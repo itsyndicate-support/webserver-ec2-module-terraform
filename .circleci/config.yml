@@ -17,6 +17,7 @@ jobs:
       - terraform/init
       - terraform/validate
       - terraform/plan
+      - run: ls -R
     working_directory: infrastructure
   terraform-apply:
     executor: terraform/default
@@ -42,13 +43,10 @@ workflows:
   tf-test-deploy:
     jobs:
       - tfsec-tests
-      - terraform-setup:
-          requires:
-            - tfsec-tests
+      - terraform-setup
       - hold1:
           type: approval
           requires:
-            - tfsec-tests
             - terraform-setup
       - terraform-apply:
           requires:
