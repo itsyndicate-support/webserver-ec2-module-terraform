@@ -14,10 +14,10 @@ jobs:
     executor: terraform/default
     steps:
       - checkout
+      - run: ls -R
       - terraform/init
       - terraform/validate
       - terraform/plan
-      - run: ls -R
     working_directory: infrastructure
   terraform-apply:
     executor: terraform/default
