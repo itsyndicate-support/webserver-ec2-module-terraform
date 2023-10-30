@@ -30,6 +30,10 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: cd infrastructure && terraform apply -auto-approve
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
   infrastructure-test:
     docker:
       - image: golang:1.21
