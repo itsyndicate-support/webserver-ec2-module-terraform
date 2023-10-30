@@ -36,11 +36,15 @@ jobs:
             - .
   infrastructure-test:
     docker:
-      - image: chiphwang/terratest:v5
+      - image: golang:1.21.3
     steps:
       - attach_workspace:
           at: ~/project
-      - run: cd test && go test
+      - run: |
+          cd test \
+          && go mod init github.com/wexire/webserver-ec2-module-terraform \
+          && go mod tidy \
+          && go test
   terraform-destroy:
     docker:
       - image: hashicorp/terraform
