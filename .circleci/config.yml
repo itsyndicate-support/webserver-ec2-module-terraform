@@ -18,34 +18,31 @@ jobs:
           root: ~/project
           paths:
             - .
+      - run: cd infrastructure
       - run: terraform init
       - run: terraform validate
       - run: terraform plan
-    working_directory: ~/project/infrastructure
   terraform-apply:
     docker:
       - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: ~/project
-      - run: terraform apply -auto-approve
-    working_directory: ~/project/infrastructure
+      - run: cd infrastructure && terraform apply -auto-approve
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
       - attach_workspace:
           at: ~/project
-      - run: go test
-    working_directory: ~/project/test
+      - run: cd test && go test
   terraform-destroy:
     docker:
       - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: ~/project
-      - run: terraform destroy -auto-approve
-    working_directory: ~/project/infrastructure
+      - run: cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
