@@ -3,14 +3,14 @@
 output "http_ip" {
   value = {
     for instance in aws_instance.http :
-    instance.id => instance.private_ip
+    instance.id => instance.public_ip
   }
 }
 
 output "db_ip" {
   value = {
     for instance in aws_instance.db :
-    instance.id => instance.private_ip
+    instance.id => instance.public_ip
   }
 }
 

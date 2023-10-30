@@ -16,15 +16,3 @@ resource "aws_instance" "http" {
     Name = each.key
   }
 }
-
-# Attach floating ip on instance http
-resource "aws_eip" "public_http" {
-  for_each   = var.http_instance_names
-  vpc        = true
-  instance   = aws_instance.http[each.key].id
-  depends_on = [aws_internet_gateway.gw]
-  tags = {
-    Name = "public-http-${each.key}"
-  }
-}
-

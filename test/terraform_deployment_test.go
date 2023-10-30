@@ -13,22 +13,6 @@ func TestTerraformDeployment(t *testing.T) {
 	terraformOptions := &terraform.Options{
 		// Set the path to your Terraform code.
 		TerraformDir: "../infrastructure",
-
-		// Variables to pass to your Terraform code.
-		Vars: map[string]interface{}{
-			"vpc_cidr": "192.168.0.0/16",
-			"network_http": map[string]interface{}{
-				"subnet_name": "subnet_http",
-				"cidr":        "192.168.1.0/24",
-			},
-			"network_db": map[string]interface{}{
-				"subnet_name": "subnet_db",
-				"cidr":        "192.168.2.0/24",
-			},
-		},
-
-		// Variables to pass when running 'terraform init'.
-		VarFiles: []string{"webserver-ec2-module-terraform/infrastructure"},
 	}
 
 	// Check that the EC2 instances are created.
