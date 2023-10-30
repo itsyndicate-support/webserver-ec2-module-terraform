@@ -19,7 +19,6 @@ jobs:
           paths:
             - ./test
             - ./infrastructure
-      - run: ls -R
       - terraform/init:
           path: ./infrastructure
       - terraform/validate:
@@ -31,9 +30,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run: ls -R
-      - terraform/apply
-    working_directory: ~/project/infrastructure
+      - terraform/apply:
+          path: ./infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
@@ -47,8 +45,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - terraform/destroy
-    working_directory: ~/project/infrastructure
+      - terraform/destroy:
+          path: ./infrastructure
   
 workflows:
   tf-test-deploy:
