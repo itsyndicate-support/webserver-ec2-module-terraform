@@ -12,7 +12,7 @@ func TestTerraformDeployment(t *testing.T) {
 	// Define the Terraform options.
 	terraformOptions := &terraform.Options{
 		// Set the path to your Terraform code.
-		TerraformDir: "webserver-ec2-module-terraform",
+		TerraformDir: "../infrastructure",
 
 		// Variables to pass to your Terraform code.
 		Vars: map[string]interface{}{
@@ -33,13 +33,13 @@ func TestTerraformDeployment(t *testing.T) {
 
 	// Check that the EC2 instances are created.
 	httpInstances := terraform.OutputList(t, terraformOptions, "http_id")
-	dbInstance := terraform.Output(t, terraformOptions, "db_id")
+	dbInstances := terraform.OutputList(t, terraformOptions, "db_id")
 
 	assert.Equal(t, 2, len(httpInstances), "Expected 2 HTTP instances to be created")
-	assert.NotEmpty(t, dbInstance, "Expected a database instance to be created")
+	assert.NotEmpty(t, dbInstances, "Expected a database instance to be created")
 
 	// Get the public IP address of the EC2 instance.
-	publicIP := aws.GetPublicIpOfEc2Instance(t, dbInstance, "us-east-1")
+	publicIP := aws.GetPublicIpsOfEc2Instances(t, dbInstances, "us-east-1")
 
 	// Ensure that the public IP is empty (i.e., the instance doesn't have a public IP).
 	assert.Empty(t, publicIP, "Expected the EC2 instance to not have a public IP")
