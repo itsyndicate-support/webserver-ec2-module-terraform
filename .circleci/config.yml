@@ -1,35 +1,43 @@
 version: 2.1
+
 jobs:
   tfsec_tests:
     docker:
       - image: tfsec/tfsec:latest
     steps:
       - run:
-          name: "Run tfsec"
+          name: Tfsec Tests
           command: tfsec . --format=json
-          
+
   terraform_init:
     docker:
       - image: hashicorp/terraform:latest
     steps:
       - checkout
-      - run: terraform init
+      - run:
+          name: Terraform Init
+          command: terraform init
 
   terraform_validate_and_plan:
     docker:
       - image: hashicorp/terraform:latest
     steps:
       - checkout
-      - run: terraform validate
-      - run: terraform plan -out=tfplan
-      # Добавьте здесь логику ожидания утверждения через API CircleCI
+      - run:
+          name: Terraform Validate
+          command: terraform validate
+      - run:
+          name: Terraform Plan
+          command: terraform plan -out=tfplan
+      - hold:
+          type: approval
+          requires:
+            - tfsec_tests
+            - terraform_init
+      - run:
+          name: Terraform Apply
+          command: terraform apply "tfplan"
 
-  terraform_apply:
-    docker:
-      - image: hashicorp/terraform:latest
-    steps:
-      - checkout
-      - run: terraform apply "tfplan"
 
 workflows:
   version: 2
@@ -41,6 +49,4 @@ workflows:
           requires:
             - tfsec_tests
             - terraform_init
-      - terraform_apply:
-          requires:
-            - terraform_validate_and_plan
+
