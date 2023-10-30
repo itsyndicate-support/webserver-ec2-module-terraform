@@ -36,7 +36,7 @@ jobs:
             - .
   infrastructure-test:
     docker:
-      - image: austincloud/terratest
+      - image: chiphwang/terratest:v5
     steps:
       - attach_workspace:
           at: ~/project
