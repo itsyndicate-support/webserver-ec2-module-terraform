@@ -3,14 +3,7 @@ jobs:
   tfsec_tests:
     docker:
       - image: tfsec/tfsec:latest
-    working_directory: ~/project  # Установите рабочий каталог в контейнере
     steps:
-      - run:
-          name: "Install Git and SSH"
-          command: |
-            sudo apk update
-            sudo apk install git
-            sudo apk install ssh
       - run:
           name: "Run tfsec"
           command: tfsec . --format=json
