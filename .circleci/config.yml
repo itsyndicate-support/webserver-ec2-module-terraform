@@ -10,54 +10,41 @@ jobs:
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
-  terraform-setup:
-    executor: terraform/default
-    steps:
-      - checkout
-      - terraform/init:
-          path: ./infrastructure
-      - terraform/validate:
-          path: ./infrastructure
-      - terraform/plan:
-          path: ./infrastructure
-  terraform-apply:
-    executor: terraform/default
-    steps:
-      - checkout
-      - terraform/apply:
-          path: ./infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
-      - checkout
-      - run: cd test && go test
-  terraform-destroy:
-    executor: terraform/default
-    steps:
-      - checkout
-      - terraform/destroy:
-          path: ./infrastructure
+      - run: go test
   
 workflows:
   tf-test-deploy:
     jobs:
       - tfsec-tests
-      - terraform-setup
-      - hold1:
+      - terraform/init:
+          checkout: true
+      - terraform/validate:
+          checkout: true
+      - terraform/plan:
+          checkout: true
+          persist-workspace: true
+          requires:
+            - terraform/validate
+      - approve_apply:
           type: approval
           requires:
-            - terraform-setup
-      - terraform-apply:
+            - terraform/plan
+      - terraform/apply:
+          attach-workspace: true
           requires:
-            - hold1
+            - approve_apply
       - infrastructure-test:
           requires:
-            - terraform-apply
-      - hold2:
+            - terraform/apply
+      - approve_destroy:
           type: approval
           requires:
-            - terraform-apply
-      - terraform-destroy:
+            - terraform/apply
+      - terraform/destroy:
+          attach-workspace: true
           requires:
-            - hold2
+            - approve_destroy
