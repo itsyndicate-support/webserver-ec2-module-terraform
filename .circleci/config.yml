@@ -36,7 +36,7 @@ jobs:
             - .
   infrastructure-test:
     docker:
-      - image: golang:1.21
+      - image: golang:1.21.3
     steps:
       - attach_workspace:
           at: ~/project
