@@ -15,7 +15,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "TfSec"
+          name: "tfsec"
           command: "terraform init"
           command: "terraform plan"
           command: "tfsec . --format=json"
@@ -26,4 +26,4 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-      - TfSec
+      - tfsec
