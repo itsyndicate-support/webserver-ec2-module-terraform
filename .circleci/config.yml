@@ -15,37 +15,37 @@ jobs:
     steps:
       - checkout
       - persist_to_workspace:
-          root: .
+          root: ~/project
           paths:
             - .
       - run: terraform init
       - run: terraform validate
       - run: terraform plan
-    working_directory: ./infrastructure
+    working_directory: ~/project/infrastructure
   terraform-apply:
     docker:
       - image: hashicorp/terraform
     steps:
       - attach_workspace:
-          at: .
+          at: ~/project
       - run: terraform apply -auto-approve
-    working_directory: ./infrastructure
+    working_directory: ~/project/infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
       - attach_workspace:
-          at: .
+          at: ~/project
       - run: go test
-    working_directory: ./test
+    working_directory: ~/project/test
   terraform-destroy:
     docker:
       - image: hashicorp/terraform
     steps:
       - attach_workspace:
-          at: .
+          at: ~/project
       - run: terraform destroy -auto-approve
-    working_directory: ./infrastructure
+    working_directory: ~/project/infrastructure
   
 workflows:
   tf-test-deploy:
