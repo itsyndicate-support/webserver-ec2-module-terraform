@@ -14,6 +14,7 @@ jobs:
     # See: https://circleci.com/docs/configuration-reference/#steps
     steps:
       - checkout
+      - name: tfsec
       - run: tfsec . --format=json
           
 
