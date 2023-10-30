@@ -14,14 +14,14 @@ jobs:
       - image: hashicorp/terraform
     steps:
       - checkout
+      - run: cd infrastructure && ls -R
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan
       - persist_to_workspace:
           root: ~/project
           paths:
             - .
-      - run: cd infrastructure
-      - run: terraform init
-      - run: terraform validate
-      - run: terraform plan
   terraform-apply:
     docker:
       - image: hashicorp/terraform
