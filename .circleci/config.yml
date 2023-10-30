@@ -5,7 +5,6 @@ jobs:
       - image: aquasec/tfsec:latest
     working_directory: /project  # Установите рабочий каталог в контейнере
     steps:
-      - checkout
       - run:
           name: "Install Git and SSH"
           command: |
