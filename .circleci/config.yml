@@ -47,7 +47,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run: ls -aR && cd infrastructure && terraform destroy -auto-approve
+      - run: cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
