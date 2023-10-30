@@ -36,7 +36,7 @@ jobs:
             - .
   infrastructure-test:
     docker:
-      - image: hashicorp/terraform
+      - image: austincloud/terratest
     steps:
       - attach_workspace:
           at: ~/project
