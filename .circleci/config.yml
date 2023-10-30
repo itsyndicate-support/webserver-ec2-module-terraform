@@ -22,10 +22,15 @@ workflows:
       - tfsec-tests
       - terraform/init:
           checkout: true
+          path: ./infrastructure
       - terraform/validate:
           checkout: true
+          path: ./infrastructure
+          requires:
+            - terraform/init
       - terraform/plan:
           checkout: true
+          path: ./infrastructure
           persist-workspace: true
           requires:
             - terraform/validate
@@ -35,6 +40,7 @@ workflows:
             - terraform/plan
       - terraform/apply:
           attach-workspace: true
+          path: ./infrastructure
           requires:
             - approve_apply
       - infrastructure-test:
@@ -46,5 +52,6 @@ workflows:
             - terraform/apply
       - terraform/destroy:
           attach-workspace: true
+          path: ./infrastructure
           requires:
             - approve_destroy
