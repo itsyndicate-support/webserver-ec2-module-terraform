@@ -21,14 +21,25 @@ jobs:
       - checkout
       - run: terraform validate
       - run: terraform plan -out=tfplan
-          requires:
-            - tfsec_tests
-            - terraform_init
+      # Добавьте здесь логику ожидания утверждения через API CircleCI
+
+  terraform_apply:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
       - run: terraform apply "tfplan"
 
 workflows:
+  version: 2
   build-and-deploy:
     jobs:
       - tfsec_tests
       - terraform_init
-      - terraform_validate_and_plan
+      - terraform_validate_and_plan:
+          requires:
+            - tfsec_tests
+            - terraform_init
+      - terraform_apply:
+          requires:
+            - terraform_validate_and_plan
