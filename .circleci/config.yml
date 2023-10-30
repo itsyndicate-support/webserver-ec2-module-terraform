@@ -4,7 +4,9 @@ jobs:
     docker:
       - image: tfsec/tfsec:latest
     steps:
-      - run: sudo tfsec . --format=json
+      - run:
+          name: Run tfsec
+          command: tfsec $CIRCLE_WORKING_DIRECTORY --format=json
 
   terraform_init:
     docker:
