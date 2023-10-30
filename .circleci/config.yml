@@ -68,7 +68,7 @@ workflows:
       - hold2:
           type: approval
           requires:
-            - infrastructure-test
+            - terraform-apply
       - terraform-destroy:
           requires:
             - hold2
