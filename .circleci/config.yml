@@ -8,9 +8,9 @@ jobs:
       - run:
           name: "Install Git and SSH"
           command: |
-            sudo apt-get update
-            sudo apt-get install git
-            sudo apt-get install ssh
+            sudo apk update
+            sudo apk install git
+            sudo apk install ssh
       - run:
           name: "Run tfsec"
           command: tfsec . --format=json
