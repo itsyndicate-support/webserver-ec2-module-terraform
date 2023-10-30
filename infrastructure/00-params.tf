@@ -33,6 +33,6 @@ variable "network_db" {
 # Set number of instance
 variable "db_instance_names" {
   type    = set(string)
-  default = ["instance-db-1", "instance-db-2", "instance-db-3"]
+  default = ["instance-db-1", "instance-db-2"]
 }
 
