@@ -3,11 +3,13 @@ jobs:
   tfsec_tests:
     docker:
       - image: tfsec/tfsec:latest
+    working_directory: /project  # Установите рабочий каталог в контейнере
     steps:
+      - checkout
       - run:
           name: Run tfsec
-          command: tfsec $CIRCLE_WORKING_DIRECTORY --format=json
-
+          command: tfsec . --format=json
+          
   terraform_init:
     docker:
       - image: hashicorp/terraform:latest
