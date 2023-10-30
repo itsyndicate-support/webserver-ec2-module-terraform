@@ -36,7 +36,7 @@ jobs:
             - .
   infrastructure-test:
     docker:
-      - image: golang:1.21.3
+      - image: hashicorp/terraform:full
     steps:
       - attach_workspace:
           at: ~/project
