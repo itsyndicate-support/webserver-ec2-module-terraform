@@ -20,11 +20,18 @@ jobs:
       - checkout
       - run: terraform validate
       - run: terraform plan -out=tfplan
+
+  terraform_apply:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
       - hold:
           type: approval
           requires:
             - tfsec_tests
             - terraform_init
+            - terraform_validate_and_plan
       - run: terraform apply "tfplan"
 
   infrastructure_tests:
@@ -41,4 +48,7 @@ workflows:
       - tfsec_tests
       - terraform_init
       - terraform_validate_and_plan
+      - terraform_apply:
+          requires:
+            - terraform_validate_and_plan
       - infrastructure_tests
