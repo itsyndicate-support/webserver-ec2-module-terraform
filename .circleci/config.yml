@@ -1,52 +1,86 @@
 version: 2.1
 
-jobs:
-  tfsec_tests:
+executors:
+  tfsec-executor:
     docker:
       - image: tfsec/tfsec:latest
-    steps:
-      - run:
-          name: Tfsec Tests
-          command: tfsec . --format=json
+        environment:
+          TF_SEC_DIR: /tmp/project
+    working_directory: /tmp/project
 
-  terraform_init:
-    docker:
-      - image: hashicorp/terraform:latest
+jobs:
+  tfsec-test:
+    executor: tfsec-executor
     steps:
       - checkout
       - run:
-          name: Terraform Init
+          name: Run tfsec tests
+          command: tfsec .
+
+  terraform-init:
+    executor: tfsec-executor
+    steps:
+      - checkout
+      - run:
+          name: Terraform init
           command: terraform init
 
-  terraform_validate_and_plan:
-    docker:
-      - image: hashicorp/terraform:latest
+  terraform-validate-plan:
+    executor: tfsec-executor
     steps:
       - checkout
       - run:
-          name: Terraform Validate
-          command: terraform validate
-      - run:
-          name: Terraform Plan
-          command: terraform plan -out=tfplan
-      - hold:
-          type: approval
-          requires:
-            - tfsec_tests
-            - terraform_init
-      - run:
-          name: Terraform Apply
-          command: terraform apply "tfplan"
+          name: Terraform validate and plan
+          command: |
+            terraform validate
+            terraform plan
 
+  hold-for-approval-1:
+    executor: tfsec-executor
+    steps:
+      - checkout
+      - run:
+          name: Hold for approval
+          command: echo "Hold for approval. Approve in CircleCI dashboard to continue."
+
+  terraform-apply:
+    executor: tfsec-executor
+    steps:
+      - checkout
+      - run:
+          name: Terraform apply
+          command: terraform apply -auto-approve
+
+  infrastructure-tests:
+    executor: tfsec-executor
+    steps:
+      - checkout
+      - run:
+          name: Infrastructure tests
+          command: echo "Your infrastructure tests command here"
+
+  hold-for-approval-2:
+    executor: tfsec-executor
+    steps:
+      - checkout
+      - run:
+          name: Hold for approval
+          command: echo "Hold for approval. Approve in CircleCI dashboard to continue."
 
 workflows:
   version: 2
-  build-and-deploy:
+  build-deploy:
     jobs:
-      - tfsec_tests
-      - terraform_init
-      - terraform_validate_and_plan:
+      - tfsec-test
+      - terraform-init
+      - terraform-validate-plan
+      - hold-for-approval-1:
+          type: approval
+      - terraform-apply:
           requires:
-            - tfsec_tests
-            - terraform_init
-
+            - hold-for-approval-1
+      - infrastructure-tests:
+          requires:
+            - terraform-apply
+      - hold-for-approval-2:
+          type: approval
