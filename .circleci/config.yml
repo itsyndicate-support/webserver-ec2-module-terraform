@@ -45,6 +45,12 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
+      - run: ls -R
+      - run: |
+          terraform providers lock \
+            -platform=windows_amd64 \
+            -platform=darwin_amd64 \
+            -platform=linux_amd64
       - terraform/destroy:
           path: ./infrastructure
   
