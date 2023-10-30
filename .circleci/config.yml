@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
-  terraform: circleci/terraform@3.2.1
 jobs:
   tfsec-tests:
     executor: tfsec/default
@@ -10,48 +9,63 @@ jobs:
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
+  terraform-setup:
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan
+    working_directory: ./infrastructure
+  terraform-apply:
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run: terraform apply -auto-approve
+    working_directory: ./infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
+      - attach_workspace:
+          at: .
       - run: go test
+    working_directory: ./test
+  terraform-destroy:
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run: terraform destroy -auto-approve
+    working_directory: ./infrastructure
   
 workflows:
   tf-test-deploy:
     jobs:
       - tfsec-tests
-      - terraform/init:
-          checkout: true
-          path: ./infrastructure
-      - terraform/validate:
-          checkout: true
-          path: ./infrastructure
-          requires:
-            - terraform/init
-      - terraform/plan:
-          checkout: true
-          path: ./infrastructure
-          persist-workspace: true
-          requires:
-            - terraform/validate
+      - terraform-setup
       - approve_apply:
           type: approval
           requires:
-            - terraform/plan
-      - terraform/apply:
-          attach-workspace: true
-          path: ./infrastructure
+            - terraform-setup
+      - terraform-apply:
           requires:
             - approve_apply
       - infrastructure-test:
           requires:
-            - terraform/apply
+            - terraform-apply
       - approve_destroy:
           type: approval
           requires:
-            - terraform/apply
-      - terraform/destroy:
-          attach-workspace: true
-          path: ./infrastructure
+            - terraform-apply
+      - terraform-destroy:
           requires:
             - approve_destroy
