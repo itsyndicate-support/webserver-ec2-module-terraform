@@ -14,29 +14,30 @@ jobs:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/init
-      - terraform/validate
-      - terraform/plan
-    working_directory: ~/project/infrastructure
+      - terraform/init:
+          path: ./infrastructure
+      - terraform/validate:
+          path: ./infrastructure
+      - terraform/plan:
+          path: ./infrastructure
   terraform-apply:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/apply
-    working_directory: ~/project/infrastructure
+      - terraform/apply:
+          path: ./infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
       - checkout
-      - run: go test
-    working_directory: ~/project/test
+      - run: cd test && go test
   terraform-destroy:
     executor: terraform/default
     steps:
       - checkout
-      - terraform/destroy
-    working_directory: ~/project/infrastructure
+      - terraform/destroy:
+          path: ./infrastructure
   
 workflows:
   tf-test-deploy:
