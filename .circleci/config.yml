@@ -14,42 +14,29 @@ jobs:
     executor: terraform/default
     steps:
       - checkout
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - ./test
-            - ./infrastructure
-      - run: ls -aR
-      - terraform/init:
-          path: ./infrastructure
-      - terraform/validate:
-          path: ./infrastructure
-      - terraform/plan:
-          path: ./infrastructure
+      - terraform/init
+      - terraform/validate
+      - terraform/plan
+    working_directory: ~/project/infrastructure
   terraform-apply:
     executor: terraform/default
     steps:
-      - attach_workspace:
-          at: ~/project
-      - run: ls -aR
-      - terraform/apply:
-          path: ./infrastructure
+      - checkout
+      - terraform/apply
+    working_directory: ~/project/infrastructure
   infrastructure-test:
     docker:
       - image: golang:1.21
     steps:
-      - attach_workspace:
-          at: ~/project
+      - checkout
       - run: go test
     working_directory: ~/project/test
   terraform-destroy:
     executor: terraform/default
     steps:
-      - attach_workspace:
-          at: ~/project
-      - run: ls -aR
-      - terraform/destroy:
-          path: ./infrastructure
+      - checkout
+      - terraform/destroy
+    working_directory: ~/project/infrastructure
   
 workflows:
   tf-test-deploy:
