@@ -21,8 +21,6 @@ jobs:
       - checkout
       - run: terraform validate
       - run: terraform plan -out=tfplan
-      - hold:
-          name: "hold"
           type: approval
           requires:
             - tfsec_tests
