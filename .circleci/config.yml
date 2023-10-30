@@ -3,7 +3,7 @@ jobs:
   tfsec_tests:
     docker:
       - image: aquasec/tfsec:latest
-    working_directory: /project  # Установите рабочий каталог в контейнере
+    working_directory: ~/project  # Установите рабочий каталог в контейнере
     steps:
       - run:
           name: "Install Git and SSH"
