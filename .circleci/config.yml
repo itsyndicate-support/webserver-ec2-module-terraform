@@ -1,26 +1,44 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/configuration-reference
 version: 2.1
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/configuration-reference/#executor-job
+  tfsec_tests:
     docker:
       - image: tfsec/tfsec:latest
-    # Add steps to the job
-    # See: https://circleci.com/docs/configuration-reference/#steps
+    steps:
+      - run: tfsec .
+
+  terraform_init:
+    docker:
+      - image: hashicorp/terraform:latest
     steps:
       - checkout
-      - name: tfsec
-      - run: tfsec . --format=json
-          
+      - run: terraform init
 
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/configuration-reference/#workflows
+  terraform_validate_and_plan:
+    docker:
+      - image: hashicorp/terraform:latest
+    steps:
+      - checkout
+      - run: terraform validate
+      - run: terraform plan -out=tfplan
+      - hold:
+          type: approval
+          requires:
+            - tfsec_tests
+            - terraform_init
+      - run: terraform apply "tfplan"
+
+  infrastructure_tests:
+    docker:
+      - image: your-custom-image-for-tests:latest
+    steps:
+      - checkout
+      # Add steps to run your infrastructure tests
+
 workflows:
-  say-hello-workflow:
+  version: 2
+  build-and-deploy:
     jobs:
-      - tfsec
+      - tfsec_tests
+      - terraform_init
+      - terraform_validate_and_plan
+      - infrastructure_tests
