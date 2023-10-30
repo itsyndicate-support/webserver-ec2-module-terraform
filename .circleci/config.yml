@@ -4,7 +4,6 @@ jobs:
     docker:
       - image: tfsec/tfsec:latest
     steps:
-      - checkout
       - run: tfsec .
 
   terraform_init:
