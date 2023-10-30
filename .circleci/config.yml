@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: tfsec/tfsec:latest
     steps:
-      - run: tfsec . --format=json
+      - run: sudo tfsec . --format=json
 
   terraform_init:
     docker:
