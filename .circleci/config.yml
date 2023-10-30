@@ -7,11 +7,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install git and ssh
+          name: "Install Git and SSH"
           command: |
-            apt-get update
-            apt-get install -y git ssh
-          name: Run tfsec
+            sudo apt-get update
+            sudo apt-get install git
+            sudo apt-get install ssh
+          name: "Run tfsec"
           command: tfsec . --format=json
           
   terraform_init:
