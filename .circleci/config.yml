@@ -15,7 +15,7 @@ jobs:
     steps:
       - checkout
       - run: cd infrastructure && ls -R
-      - run: terraform init
+      - run: ls -R && terraform init
       - run: terraform validate
       - run: terraform plan
       - persist_to_workspace:
