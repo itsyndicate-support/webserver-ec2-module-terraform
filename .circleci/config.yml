@@ -80,7 +80,6 @@ workflows:
   build-deploy:
     jobs:
       - tfsec-test
-      - terraform-init
       - terraform-validate-plan:
           requires: terraform-init
       - hold-for-approval-1:
