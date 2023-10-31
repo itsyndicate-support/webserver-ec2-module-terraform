@@ -7,6 +7,11 @@ executors:
         environment:
           TF_SEC_DIR: /tmp/project
     working_directory: /tmp/project
+    
+terraform-executor: 
+    docker:
+      - image: hashicorp/terraform:latest 
+    working_directory: /tmp/project
 
 jobs:
   tfsec-test:
@@ -18,26 +23,16 @@ jobs:
           command: tfsec .
 
   terraform-init:
-    executor: tfsec-executor
-      docker:
-        - image: hashicorp/terraform:latest
-          environment:
-          TF_SEC_DIR: /tmp/project
-    working_directory: /tmp/project
-      steps:
+    executor: terraform-executor
+            steps:
         - checkout
         - run:
             name: Terraform init
             command: terraform init
 
   terraform-validate-plan:
-    executor: tfsec-executor
-    docker:
-        - image: hashicorp/terraform:latest
-          environment:
-          TF_SEC_DIR: /tmp/project
-    working_directory: /tmp/project
-      steps:
+    executor: terraform-executor
+          steps:
         - checkout
         - run:
             name: Terraform validate and plan
@@ -54,7 +49,7 @@ jobs:
           command: echo "Hold for approval. Approve in CircleCI dashboard to continue."
 
   terraform-apply:
-    executor: tfsec-executor
+    executor: terraform-executor
     steps:
       - checkout
       - run:
