@@ -131,10 +131,10 @@ jobs:
       - run:
           name: Create and Submit Pull Request
           command: |
-            git checkout -b my-new-changes
-            git add .
-            git commit -m "Describe your changes"
-            git push origin circleci-project-setup
+            # git checkout -b my-new-changes
+            # git add .
+            # git commit -m "Describe your changes"
+            # git push origin circleci-project-setup
             gh pr create --base main --head circleci-project-setup
 
             
