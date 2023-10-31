@@ -59,7 +59,7 @@ func TestMatchTfvarsAndOutputs(t *testing.T) {
 	}
 
 
-	dbPublicIPs := terraform.OutputList(t, terraformOptions, "http_public_ips")
+	dbPublicIPs := terraform.OutputList(t, terraformOptions, "db_public_ips")
 
 	// Check if the list of DB instance public IP addresses is empty
 	assert.Empty(t, dbPublicIPs)

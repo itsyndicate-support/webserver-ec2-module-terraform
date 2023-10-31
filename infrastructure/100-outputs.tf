@@ -20,7 +20,7 @@ output "http_public_ips" {
   value = [for instance in aws_instance.http : instance.public_ip]
 }
 
-output "http_public_ips" {
+output "db_public_ips" {
   value = [for instance in aws_instance.db : instance.public_ip]
 }
 
