@@ -58,7 +58,7 @@ jobs:
       - checkout
       - run:
           name: Terraform apply
-          #command: terraform apply -auto-approve
+          command: echo "apply"
 
   infrastructure-tests:
     executor: tfsec-executor
