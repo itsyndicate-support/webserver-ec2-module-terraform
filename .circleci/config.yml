@@ -41,13 +41,12 @@ jobs:
   infrastructure-test:
     docker:
       - image: golang:1.21.3
-      - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: ~/project
       - run:
           name: Install Terraform
-          command: cd test && ./install_terraform
+          command: cd test && ./install_terraform.sh
       - run:
           name: Test Infrastructure
           command: |
