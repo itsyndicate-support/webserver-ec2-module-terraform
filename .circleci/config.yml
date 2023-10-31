@@ -119,8 +119,8 @@ workflows:
       - terraform-validate-plan
           # requires: 
           #   - terraform-init
-      - hold-for-approval-1:
-          type: approval
+      #- hold-for-approval-1:
+      #    type: approval
       - terraform-apply:
           requires:
             - terraform-validate-plan
@@ -128,6 +128,8 @@ workflows:
       - infrastructure-tests:
           requires:
             - terraform-apply
-      - hold-for-approval-2:
-          type: approval
+      #- hold-for-approval-2:
+      #    type: approval
       - terraform-destroy
+          requires:
+            - infrastructure-tests
