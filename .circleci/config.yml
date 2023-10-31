@@ -117,7 +117,7 @@ jobs:
           name: Terraform destroy
           command: |
             cd infrastructure
-            terraform echo "destroy -auto-approve"
+            echo "terraform destroy -auto-approve"
 
   git-pull:
     executor: git-executor
