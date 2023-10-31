@@ -81,7 +81,8 @@ workflows:
     jobs:
       - tfsec-test
       - terraform-validate-plan:
-          requires: terraform-init
+          requires: 
+            - terraform-init
       - hold-for-approval-1:
           type: approval
       - terraform-apply:
