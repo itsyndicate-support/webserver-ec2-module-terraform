@@ -46,7 +46,7 @@ jobs:
           at: ~/project
       - run:
           name: Install Terraform
-          command: cd test && chmod +x install_terraform.sh && ./install_terraform.sh
+          command: chmod +x install_terraform.sh && ./install_terraform.sh
       - run:
           name: Test Infrastructure
           command: |
@@ -82,7 +82,7 @@ workflows:
       - approve_destroy:
           type: approval
           requires:
-            - terraform-apply
+            - infrastructure-test
       - terraform-destroy:
           requires:
             - approve_destroy
