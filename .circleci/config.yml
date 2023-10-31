@@ -29,8 +29,7 @@ jobs:
       - run:
           name: Terraform init
           command: |
-            pwd
-            ls -la
+            cd infrastructure
             terraform init
 
   terraform-validate-plan:
@@ -40,6 +39,7 @@ jobs:
       - run:
           name: Terraform validate and plan
           command: |
+            cd infrastructure
             terraform validate
             terraform plan
 
