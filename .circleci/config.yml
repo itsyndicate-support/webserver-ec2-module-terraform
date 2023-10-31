@@ -24,21 +24,21 @@ jobs:
 
   terraform-init:
     executor: terraform-executor
-            steps:
-        - checkout
-        - run:
-            name: Terraform init
-            command: terraform init
+    steps:
+      - checkout
+      - run:
+          name: Terraform init
+           command: terraform init
 
   terraform-validate-plan:
     executor: terraform-executor
-          steps:
-        - checkout
-        - run:
-            name: Terraform validate and plan
-            command: |
-              terraform validate
-              terraform plan
+    steps:
+      - checkout
+      - run:
+          name: Terraform validate and plan
+          command: |
+            terraform validate
+            terraform plan
 
   hold-for-approval-1:
     executor: tfsec-executor
