@@ -13,3 +13,25 @@ output "db_ip" {
     instance.id => instance.private_ip
   }
 }
+
+# Terratest outputs
+
+output "http_public_ips" {
+  value = [for instance in aws_instance.http : instance.public_ip]
+}
+
+output "http_public_ips" {
+  value = [for instance in aws_instance.db : instance.public_ip]
+}
+
+output "vpc_cidr" {
+  value = aws_vpc.terraform.cidr_block
+}
+
+output "http_subnet_cidr" {
+  value = aws_subnet.http.cidr_block
+}
+
+output "db_subnet_cidr" {
+  value = aws_subnet.db.cidr_block
+}
