@@ -14,11 +14,13 @@ jobs:
       - image: hashicorp/terraform
     steps:
       - checkout
-      - run: |
-          cd infrastructure \
-            && terraform init \
-            && terraform validate \
-            && terraform plan
+      - run:
+          name: Terraform Init & Validate & Plan
+          command: |
+            cd infrastructure \
+              && terraform init \
+              && terraform validate \
+              && terraform plan
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -29,7 +31,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run: cd infrastructure && terraform apply -auto-approve
+      - run:
+          name: Apply Terraform Infrastructure
+          command: cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -37,21 +41,26 @@ jobs:
   infrastructure-test:
     docker:
       - image: golang:1.21.3
+      - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: ~/project
-      - run: |
-          cd test \
-          && go mod init github.com/wexire/webserver-ec2-module-terraform \
-          && go mod tidy \
-          && go test
+      - run:
+          name: Test Infrastructure
+          command: |
+            cd test \
+              && go mod init github.com/wexire/webserver-ec2-module-terraform \
+              && go mod tidy \
+              && go test
   terraform-destroy:
     docker:
       - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: ~/project
-      - run: cd infrastructure && terraform destroy -auto-approve
+      - run: 
+          name: Destroy Terraform Infrastructure
+          command: cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
