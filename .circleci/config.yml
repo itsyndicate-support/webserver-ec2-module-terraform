@@ -124,9 +124,10 @@ workflows:
       - terraform-apply:
           requires:
             - terraform-validate-plan
-            - hold-for-approval-1
+            #- hold-for-approval-1
       - infrastructure-tests:
           requires:
             - terraform-apply
       - hold-for-approval-2:
           type: approval
+      - terraform-destroy
