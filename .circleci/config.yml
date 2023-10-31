@@ -85,6 +85,7 @@ jobs:
          command: |
            aws ec2 describe-vpcs --query "Vpcs[*].{ID:VpcId}" --output text
            aws ec2 describe-subnets --query "Subnets[*].{ID:SubnetId}" --output text
+           exit
      - run:
          name: Check database accessibility
          command: |
