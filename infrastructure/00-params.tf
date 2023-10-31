@@ -42,3 +42,8 @@ variable "pub_key_path" {
   type = string
   description = "Specify a path to the public ssh key"
 }
+
+variable "pub_key_filename" {
+  type = string
+  description = "Specify a filename of the public ssh key"
+}
