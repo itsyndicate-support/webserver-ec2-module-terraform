@@ -17,6 +17,11 @@ executors:
     docker:
       - image: amazon/aws-cli:latest
     working_directory: /tmp/project
+    
+  git-executor:
+    docker:
+      - image: circleci/python:3.7.9  # A basic image that includes git
+    working_directory: /tmp/project  
 
 jobs:
   tfsec-test:
@@ -114,6 +119,25 @@ jobs:
             cd infrastructure
             terraform echo "destroy -auto-approve"
 
+  git-pull:
+    executor: git-executor
+    steps:
+      - checkout
+      - run:
+          name: Setup Git Configuration
+          command: |
+            git config user.name "illia"
+            git config user.email "llolik7262@gmail.com"
+      - run:
+          name: Create and Submit Pull Request
+          command: |
+            git checkout -b my-new-changes
+            git add .
+            git commit -m "Describe your changes"
+            git push origin circleci-project-setup
+            gh pr create --base main --head circleci-project-setup
+
+            
 workflows:
   version: 2
   build-deploy:
@@ -137,3 +161,6 @@ workflows:
       - terraform-destroy:
           requires:
             - infrastructure-tests
+      - git-pull:
+          requires:
+            - terraform-destroy
