@@ -58,15 +58,35 @@ jobs:
       - checkout
       - run:
           name: Terraform apply
-          command: echo "apply"
+          command: echo "terraform apply -auto-approve"
 
-  infrastructure-tests:
-    executor: tfsec-executor
-    steps:
-      - checkout
-      - run:
-          name: Infrastructure tests
-          command: echo "Your infrastructure tests command here"
+infrastructure-tests:
+  executor: terraform-executor
+  steps:
+    - checkout
+    - run:
+        name: Check EC2 instances
+        command: |
+          aws ec2 describe-instances --query "Reservations[*].Instances[*].{ID:InstanceId}" --output text
+
+    - run:
+        name: Check RDS database
+        command: |
+          aws rds describe-db-instances --query "DBInstances[*].DBInstanceIdentifier" --output text
+
+
+    - run:
+        name: Check VPC and subnets
+        command: |
+          aws ec2 describe-vpcs --query "Vpcs[*].{ID:VpcId}" --output text
+          aws ec2 describe-subnets --query "Subnets[*].{ID:SubnetId}" --output text
+
+    - run:
+        name: Check database accessibility
+        command: |
+          aws rds describe-db-instances --db-instance-identifier YOUR_DB_INSTANCE_ID --query "DBInstances[*].VpcSecurityGroups[0].VpcSecurityGroupId" --output text
+          aws ec2 describe-security-groups --group-ids YOUR_SECURITY_GROUP_ID --query "SecurityGroups[*].{Ingress:IpPermissions}" --output text
+
 
   hold-for-approval-2:
     executor: tfsec-executor
@@ -75,6 +95,16 @@ jobs:
       - run:
           name: Hold for approval
           command: echo "Hold for approval. Approve in CircleCI dashboard to continue."
+          
+  terraform-destroy:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - run:
+          name: Terraform destroy
+          command: |
+            cd infrastructure
+            terraform echo "destroy -auto-approve"
 
 workflows:
   version: 2
@@ -89,6 +119,7 @@ workflows:
           type: approval
       - terraform-apply:
           requires:
+            - terraform-validate-plan
             - hold-for-approval-1
       - infrastructure-tests:
           requires:
