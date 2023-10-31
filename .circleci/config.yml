@@ -28,7 +28,7 @@ jobs:
       - checkout
       - run:
           name: Terraform init
-           command: terraform init
+          command: terraform init
 
   terraform-validate-plan:
     executor: terraform-executor
