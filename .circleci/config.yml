@@ -20,7 +20,7 @@ jobs:
       - checkout
       - run:
           name: Run tfsec tests
-          command: tfsec .
+          command: tfsec . --format-json
 
   terraform-init:
     executor: terraform-executor
