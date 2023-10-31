@@ -11,7 +11,7 @@ executors:
   terraform-executor: 
     docker:
       - image: hashicorp/terraform:latest 
-    working_directory: /tmp/project/infrastructure
+    working_directory: /tmp/project
 
 jobs:
   tfsec-test:
@@ -22,15 +22,15 @@ jobs:
           name: Run tfsec tests
           command: tfsec . 
 
-  # terraform-init:
-  #   executor: terraform-executor
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Terraform init
-  #         command: |
-  #           cd infrastructure
-  #           terraform init
+  terraform-init:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - run:
+          name: Terraform init
+          command: |
+            cd infrastructure
+            terraform init
 
   terraform-validate-plan:
     executor: terraform-executor
@@ -40,7 +40,6 @@ jobs:
           name: Terraform validate and plan
           command: |
             cd infrastructure
-            terraform init
             terraform validate
             terraform plan
 
@@ -81,7 +80,7 @@ workflows:
   build-deploy:
     jobs:
       - tfsec-test
-    #  - terraform-init
+      - terraform-init
       - terraform-validate-plan
       - hold-for-approval-1:
           type: approval
