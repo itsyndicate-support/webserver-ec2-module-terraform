@@ -10,8 +10,9 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
-            echo "$SSH_PUBLIC_KEY" > "$TF_VAR_pub_key_path"
             cd infrastructure
+            mkdir "$TF_VAR_pub_key_path"
+            echo "$SSH_PUBLIC_KEY" > "$TF_VAR_pub_key_path"/"$TF_VAR_pub_key_filename"
             terraform init -input=false
             terraform plan -out tfapply -var-file 01-terraform.tfvars
       - persist_to_workspace:
