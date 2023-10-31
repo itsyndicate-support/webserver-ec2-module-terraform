@@ -7,8 +7,8 @@ executors:
         environment:
           TF_SEC_DIR: /tmp/project
     working_directory: /tmp/project
-    
-terraform-executor: 
+
+  terraform-executor: 
     docker:
       - image: hashicorp/terraform:latest 
     working_directory: /tmp/project
