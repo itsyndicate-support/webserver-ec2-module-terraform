@@ -10,6 +10,7 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
+            echo "$SSH_PUBLIC_KEY" > "$TF_VAR_pub_key_path"
             cd infrastructure
             terraform init -input=false
             terraform plan -out tfapply -var-file 01-terraform.tfvars
