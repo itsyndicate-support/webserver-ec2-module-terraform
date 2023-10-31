@@ -85,12 +85,14 @@ jobs:
          command: |
            aws ec2 describe-vpcs --query "Vpcs[*].{ID:VpcId}" --output text
            aws ec2 describe-subnets --query "Subnets[*].{ID:SubnetId}" --output text
-           exit
+           echo "AWS CLI commands completed"
+           
      - run:
          name: Check database accessibility
          command: |
            aws rds describe-db-instances --db-instance-identifier YOUR_DB_INSTANCE_ID --query "DBInstances[*].VpcSecurityGroups[0].VpcSecurityGroupId" --output text
            aws ec2 describe-security-groups --group-ids YOUR_SECURITY_GROUP_ID --query "SecurityGroups[*].{Ingress:IpPermissions}" --output text
+           
 
 
   hold-for-approval-2:
