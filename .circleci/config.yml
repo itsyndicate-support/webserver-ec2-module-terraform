@@ -19,21 +19,31 @@ jobs:
 
   terraform-init:
     executor: tfsec-executor
-    steps:
-      - checkout
-      - run:
-          name: Terraform init
-          command: terraform init
+      docker:
+        - image: hashicorp/terraform:latest
+          environment:
+          TF_SEC_DIR: /tmp/project
+    working_directory: /tmp/project
+      steps:
+        - checkout
+        - run:
+            name: Terraform init
+            command: terraform init
 
   terraform-validate-plan:
     executor: tfsec-executor
-    steps:
-      - checkout
-      - run:
-          name: Terraform validate and plan
-          command: |
-            terraform validate
-            terraform plan
+    docker:
+        - image: hashicorp/terraform:latest
+          environment:
+          TF_SEC_DIR: /tmp/project
+    working_directory: /tmp/project
+      steps:
+        - checkout
+        - run:
+            name: Terraform validate and plan
+            command: |
+              terraform validate
+              terraform plan
 
   hold-for-approval-1:
     executor: tfsec-executor
