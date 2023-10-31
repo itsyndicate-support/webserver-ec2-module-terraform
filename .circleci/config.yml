@@ -46,7 +46,7 @@ jobs:
           at: ~/project
       - run:
           name: Install Terraform
-          command: cd test && sudo chmod +x install_terraform.sh && ./install_terraform.sh
+          command: cd test && chmod +x install_terraform.sh && ./install_terraform.sh
       - run:
           name: Test Infrastructure
           command: |
