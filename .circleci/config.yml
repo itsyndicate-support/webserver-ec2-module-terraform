@@ -3,7 +3,7 @@ version: 2.1
 executors:
   tfsec-executor:
     docker:
-      - image: tfsec/tfsec:latest
+      - image: aquasec/tfsec:latest
         environment:
           TF_SEC_DIR: /tmp/project
     working_directory: /tmp/project
