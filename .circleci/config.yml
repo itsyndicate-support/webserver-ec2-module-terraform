@@ -11,7 +11,7 @@ executors:
   terraform-executor: 
     docker:
       - image: hashicorp/terraform:latest 
-    working_directory: /tmp/project/infrastructure
+    working_directory: /tmp/project/
 
 jobs:
   tfsec-test:
@@ -30,6 +30,7 @@ jobs:
           name: Terraform init
           command: |
             pwd
+            ls -la
             terraform init
 
   terraform-validate-plan:
