@@ -84,8 +84,9 @@ jobs:
          name: Check VPC and subnets
          command: |
            aws ec2 describe-vpcs --query "Vpcs[*].{ID:VpcId}" --output text
-           # aws ec2 describe-subnets --query "Subnets[*].{ID:SubnetId}" --output text
            echo "AWS CLI commands completed"
+           aws ec2 describe-subnets --query "Subnets[*].{ID:SubnetId}" --output text
+           
            
      - run:
          name: Check database accessibility
