@@ -29,6 +29,7 @@ jobs:
       - run:
           name: Terraform init
           command: |
+            pwd
             terraform init
 
   terraform-validate-plan:
