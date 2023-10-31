@@ -130,6 +130,6 @@ workflows:
             - terraform-apply
       #- hold-for-approval-2:
       #    type: approval
-      - terraform-destroy
+      - terraform-destroy:
           requires:
             - infrastructure-tests
