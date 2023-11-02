@@ -17,7 +17,6 @@ jobs:
       - run:
           name: Set Environment Variables
           command: |
-            cd infrastructure
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
               echo "TF_VAR_environment=production" >> $BASH_ENV
             else
