@@ -29,7 +29,7 @@ jobs:
             ./env.sh \
               && cd infrastructure \
               && ../env.sh \
-              && cat env.sh \
+              && cat ../env.sh \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
               && terraform validate \
