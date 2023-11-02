@@ -23,7 +23,7 @@ jobs:
               echo "TF_VAR_environment=test" >> $BASH_ENV
             fi
             echo $BASH_ENV
-            cp $BASH_ENV bash.env
+            cp $BASH_ENV infrastructure/bash.env
             cat bash.env
             echo $TF_VAR_environment
       - run:
