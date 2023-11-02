@@ -22,7 +22,7 @@ jobs:
             else
               echo "export TF_VAR_ENVIRONMENT=test" >> env_vars.sh
             fi
-            chmod +x env_vars.sh && cat env_vars.sh
+            chmod +x env_vars.sh
       - run:
           name: Terraform Init & Validate & Plan
           command: |
