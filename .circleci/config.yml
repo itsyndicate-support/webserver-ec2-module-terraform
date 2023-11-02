@@ -27,6 +27,7 @@ jobs:
           command: |
             cd infrastructure \
               && source ../bash.env \
+              && export TF_VAR_ENVIRONMENT=test \
               && terraform init \
               && terraform validate \
               && terraform plan
