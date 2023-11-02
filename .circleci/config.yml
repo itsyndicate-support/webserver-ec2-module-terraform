@@ -19,11 +19,12 @@ jobs:
           command: |
             cd infrastructure
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              export TF_VAR_environment=production
+              echo "TF_VAR_environment=production" >> $BASH_ENV
             else
-              export TF_VAR_environment=test
+              echo "TF_VAR_environment=test" >> $BASH_ENV
             fi
-            echo ${TF_VAR_environment}
+            cp $BASH_ENV bash.env
+            printenv TF_VAR_environment
       - run:
           name: Terraform Init & Validate & Plan
           command: |
