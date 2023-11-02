@@ -18,9 +18,9 @@ jobs:
           name: Set Environment Variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              echo "TF_VAR_environment=production" >> "$BASH_ENV"
+              echo "TF_VAR_environment=production" >> $BASH_ENV
             else
-              echo "TF_VAR_environment=test" >> "$BASH_ENV"
+              echo "TF_VAR_environment=test" >> $BASH_ENV
             fi
             cp $BASH_ENV bash.env
             printenv TF_VAR_environment
