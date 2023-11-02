@@ -22,8 +22,12 @@ jobs:
             else
               echo "TF_VAR_environment=test" >> $BASH_ENV
             fi
-            cp $BASH_ENV bash.env
-            printenv TF_VAR_environment
+      - run:
+          name: Test 1
+          command: cp $BASH_ENV bash.env
+      - run:
+          name: Test 2
+          command: printenv TF_VAR_environment
       - run:
           name: Terraform Init & Validate & Plan
           command: |
