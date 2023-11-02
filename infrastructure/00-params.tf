@@ -36,4 +36,6 @@ variable "db_instance_names" {
   default = ["instance-db-1", "instance-db-2"]
 }
 
-variable "environment" {}
+variable "ENVIRONMENT" {
+  description = "The environment"
+}
