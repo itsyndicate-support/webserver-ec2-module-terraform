@@ -44,7 +44,7 @@ jobs:
           at: ~/project
       - run:
           name: Apply Terraform Infrastructure
-          command: cd infrastructure && terraform apply -auto-approve
+          command: ./env.sh && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -73,25 +73,21 @@ jobs:
           at: ~/project
       - run: 
           name: Destroy Terraform Infrastructure
-          command: cd infrastructure && terraform destroy -auto-approve
+          command: ./env.sh && cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
     jobs:
-      - tfsec-tests:
-          context: terraform
-      - terraform-setup:
-          context: terraform
+      - tfsec-tests
+      - terraform-setup
       - approve_apply:
           type: approval
           requires:
             - terraform-setup
       - terraform-apply:
-          context: terraform
           requires:
             - approve_apply
       - infrastructure-test:
-          context: terraform
           requires:
             - terraform-apply
       - approve_destroy:
@@ -99,6 +95,5 @@ workflows:
           requires:
             - infrastructure-test
       - terraform-destroy:
-          context: terraform
           requires:
             - approve_destroy

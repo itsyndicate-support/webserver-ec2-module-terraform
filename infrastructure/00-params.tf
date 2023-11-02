@@ -37,5 +37,5 @@ variable "db_instance_names" {
 }
 
 variable "ENVIRONMENT" {
-  description = "The environment"
+  type = string
 }
