@@ -17,6 +17,7 @@ jobs:
       - run:
           name: Set Environment Variables
           command: |
+            cd infrastructure
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
               export TF_VAR_environment=production
             else
