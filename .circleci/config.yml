@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
-jobs:
+jobs:  
   tfsec-tests:
     executor: tfsec/default
     steps:
@@ -14,6 +14,14 @@ jobs:
       - image: hashicorp/terraform
     steps:
       - checkout
+      - run:
+          name: Set Environment Variables
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              export TF_VAR_environment=production
+            else
+              export TF_VAR_environment=test
+            fi
       - run:
           name: Terraform Init & Validate & Plan
           command: |
