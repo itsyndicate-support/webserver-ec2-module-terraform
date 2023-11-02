@@ -22,13 +22,11 @@ jobs:
             else
               echo "TF_VAR_ENVIRONMENT=test" >> .env
             fi
-            echo $TF_VAR_ENVIRONMENT
       - run:
           name: Terraform Init & Validate & Plan
           command: |
             export $(cat .env) \
               && cd infrastructure \
-              && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
               && terraform validate \
               && terraform plan \
@@ -44,7 +42,7 @@ jobs:
           at: ~/project
       - run:
           name: Apply Terraform Infrastructure
-          command: export $(cat env_vars) && cd infrastructure && terraform apply -auto-approve
+          command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -73,7 +71,7 @@ jobs:
           at: ~/project
       - run: 
           name: Destroy Terraform Infrastructure
-          command: export $(cat env_vars) && cd infrastructure && terraform destroy -auto-approve
+          command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
