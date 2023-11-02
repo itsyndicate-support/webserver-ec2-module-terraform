@@ -18,9 +18,9 @@ jobs:
           name: Set Environment Variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              echo "TF_VAR_ENVIRONMENT=production" >> env.sh
+              echo "export TF_VAR_ENVIRONMENT=production" >> env.sh
             else
-              echo "TF_VAR_ENVIRONMENT=test" >> env.sh
+              echo "export TF_VAR_ENVIRONMENT=test" >> env.sh
             fi
             chmod +x env.sh
       - run:
@@ -28,7 +28,6 @@ jobs:
           command: |
             ./env.sh \
               && cd infrastructure \
-              && export TF_VAR_ENVIRONMENT=test \
               && terraform init \
               && terraform validate \
               && terraform plan
