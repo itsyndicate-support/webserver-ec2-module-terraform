@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
-jobs:
+jobs:  
   tfsec-tests:
     executor: tfsec/default
     steps:
@@ -15,12 +15,21 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Set environment variables
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              echo "TF_VAR_ENVIRONMENT=prod" >> .env
+            else
+              echo "TF_VAR_ENVIRONMENT=test" >> .env
+            fi
+      - run:
           name: Terraform Init & Validate & Plan
           command: |
-            cd infrastructure \
+            export $(cat .env) \
+              && cd infrastructure \
               && terraform init \
               && terraform validate \
-              && terraform plan
+              && terraform plan \
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -33,7 +42,7 @@ jobs:
           at: ~/project
       - run:
           name: Apply Terraform Infrastructure
-          command: cd infrastructure && terraform apply -auto-approve
+          command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -62,7 +71,7 @@ jobs:
           at: ~/project
       - run: 
           name: Destroy Terraform Infrastructure
-          command: cd infrastructure && terraform destroy -auto-approve
+          command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
