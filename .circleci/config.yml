@@ -18,15 +18,16 @@ jobs:
           name: Set Environment Variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              echo "TF_VAR_ENVIRONMENT=production" >> bash.env
+              echo "TF_VAR_ENVIRONMENT=production" >> env.sh
             else
-              echo "TF_VAR_ENVIRONMENT=test" >> bash.env
+              echo "TF_VAR_ENVIRONMENT=test" >> env.sh
             fi
+            chmod +x env.sh
       - run:
           name: Terraform Init & Validate & Plan
           command: |
-            cd infrastructure \
-              && source ../bash.env \
+            ../env.sh \
+              && cd infrastructure \
               && export TF_VAR_ENVIRONMENT=test \
               && terraform init \
               && terraform validate \
@@ -77,16 +78,20 @@ jobs:
 workflows:
   tf-test-deploy:
     jobs:
-      - tfsec-tests
-      - terraform-setup
+      - tfsec-tests:
+          context: terraform
+      - terraform-setup:
+          context: terraform
       - approve_apply:
           type: approval
           requires:
             - terraform-setup
       - terraform-apply:
+          context: terraform
           requires:
             - approve_apply
       - infrastructure-test:
+          context: terraform
           requires:
             - terraform-apply
       - approve_destroy:
@@ -94,5 +99,6 @@ workflows:
           requires:
             - infrastructure-test
       - terraform-destroy:
+          context: terraform
           requires:
             - approve_destroy
