@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Terraform Init & Validate & Plan
           command: |
-            ../env.sh \
+            ./env.sh \
               && cd infrastructure \
               && export TF_VAR_ENVIRONMENT=test \
               && terraform init \
