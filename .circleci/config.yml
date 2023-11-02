@@ -22,6 +22,7 @@ jobs:
             else
               export TF_VAR_environment=test
             fi
+            echo ${TF_VAR_environment}
       - run:
           name: Terraform Init & Validate & Plan
           command: |
