@@ -18,16 +18,16 @@ jobs:
           name: Set environment variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              echo "TF_VAR_ENVIRONMENT=prod" >> env_vars
+              echo "TF_VAR_ENVIRONMENT=prod" >> .env
             else
-              test "TF_VAR_ENVIRONMENT=test" >> env_vars
+              test "TF_VAR_ENVIRONMENT=test" >> .env
             fi
             ls
-            cat env_vars
+            cat .env
       - run:
           name: Terraform Init & Validate & Plan
           command: |
-            export $(cat env_vars) \
+            export $(cat .env) \
               && cd infrastructure \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
