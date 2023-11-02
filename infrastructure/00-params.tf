@@ -35,7 +35,3 @@ variable "db_instance_names" {
   type    = set(string)
   default = ["instance-db-1", "instance-db-2"]
 }
-
-variable "environment" {
-  type = string
-}
