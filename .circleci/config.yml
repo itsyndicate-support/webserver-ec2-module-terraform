@@ -29,7 +29,6 @@ jobs:
               && source ../bash.env \
               && terraform init \
               && terraform validate \
-              && terraform plan \
               && terraform plan -var="environment=test"
       - persist_to_workspace:
           root: ~/project
