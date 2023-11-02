@@ -20,7 +20,6 @@ jobs:
             chmod +x env_vars.sh \
               && sh env_vars.sh \
               && cd infrastructure \
-              && export TF_VAR_ENVIRONMENT=test \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
               && terraform validate \
