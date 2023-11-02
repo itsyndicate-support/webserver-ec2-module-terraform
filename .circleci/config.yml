@@ -44,7 +44,7 @@ jobs:
           at: ~/project
       - run:
           name: Apply Terraform Infrastructure
-          command: ./env.sh && cd infrastructure && terraform apply -auto-approve
+          command: cat env.sh && ./env.sh && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
