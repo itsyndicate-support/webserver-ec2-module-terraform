@@ -17,13 +17,17 @@ jobs:
       - run:
           name: Terraform Init & Validate & Plan
           command: |
-            chmod +x env_vars.sh \
-              && ./env_vars.sh \
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              export TF_VAR_ENVIRONMENT=production
+            else
+              export TF_VAR_ENVIRONMENT=test
+            fi \
               && cd infrastructure \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
               && terraform validate \
-              && terraform plan
+              && terraform plan \
+              && cicrcleci
       - persist_to_workspace:
           root: ~/project
           paths:
