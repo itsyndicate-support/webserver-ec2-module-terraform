@@ -18,9 +18,9 @@ jobs:
           name: Set Environment Variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              echo "\nexport TF_VAR_ENVIRONMENT=production" >> env.sh
+              echo "export TF_VAR_ENVIRONMENT=production" >> env.sh
             else
-              echo "\nexport TF_VAR_ENVIRONMENT=test" >> env.sh
+              echo "export TF_VAR_ENVIRONMENT=test" >> env.sh
             fi
             chmod +x env.sh
       - run:
