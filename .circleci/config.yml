@@ -18,7 +18,7 @@ jobs:
           name: Terraform Init & Validate & Plan
           command: |
             chmod +x env_vars.sh \
-              && sh env_vars.sh \
+              && ./env_vars.sh \
               && cd infrastructure \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
