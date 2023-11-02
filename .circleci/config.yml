@@ -15,19 +15,22 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Terraform Init & Validate & Plan
+          name: Set environment variables
           command: |
             if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              export TF_VAR_ENVIRONMENT=production
+              echo "TF_VAR_ENVIRONMENT=prod" >> env_vars
             else
-              export TF_VAR_ENVIRONMENT=test
-            fi \
+              test "TF_VAR_ENVIRONMENT=test" >> env_vars
+            fi
+      - run:
+          name: Terraform Init & Validate & Plan
+          command: |
+            export $(cat env_vars) \
               && cd infrastructure \
               && echo $TF_VAR_ENVIRONMENT \
               && terraform init \
               && terraform validate \
               && terraform plan \
-              && cicrcleci
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -40,7 +43,7 @@ jobs:
           at: ~/project
       - run:
           name: Apply Terraform Infrastructure
-          command: sh env_vars.sh && cd infrastructure && terraform apply -auto-approve
+          command: export $(cat env_vars) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -69,7 +72,7 @@ jobs:
           at: ~/project
       - run: 
           name: Destroy Terraform Infrastructure
-          command: sh env_vars.sh && cd infrastructure && terraform destroy -auto-approve
+          command: export $(cat env_vars) && cd infrastructure && terraform destroy -auto-approve
   
 workflows:
   tf-test-deploy:
