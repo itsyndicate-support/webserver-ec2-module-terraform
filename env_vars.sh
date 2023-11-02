@@ -1,3 +1,3 @@
 #!/bin/bash
 
-# ENVIRONMENT
+echo "hello world"
