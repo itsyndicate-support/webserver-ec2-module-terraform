@@ -15,11 +15,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Set Environment Variables
-          command: |
-            
-            
-      - run:
           name: Terraform Init & Validate & Plan
           command: |
             chmod +x env_vars.sh \
