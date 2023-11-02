@@ -28,6 +28,8 @@ jobs:
           command: |
             cd infrastructure \
               && cat bash.env >> $BASH_ENV \
+              && cat bash.env \
+              && cat $BASH_ENV \
               && echo $TF_VAR_environment \
               && terraform init \
               && terraform validate \
