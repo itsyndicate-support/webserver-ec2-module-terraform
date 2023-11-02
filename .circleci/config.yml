@@ -26,7 +26,7 @@ jobs:
           name: Terraform Init & Validate & Plan
           command: |
             cd infrastructure \
-              && source bash.env \
+              && source ../bash.env \
               && echo $TF_VAR_environment \
               && terraform init \
               && terraform validate \
