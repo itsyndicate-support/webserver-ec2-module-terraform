@@ -23,12 +23,12 @@ jobs:
               echo "TF_VAR_environment=test" >> $BASH_ENV
             fi
             cp $BASH_ENV infrastructure/bash.env
-            cd infrastructure && source $BASH_ENV && echo $TF_VAR_environment
       - run:
           name: Terraform Init & Validate & Plan
           command: |
             cd infrastructure \
               && cat bash.env >> $BASH_ENV \
+              && echo $TF_VAR_environment \
               && terraform init \
               && terraform validate \
               && terraform plan
