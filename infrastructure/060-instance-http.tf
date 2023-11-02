@@ -19,6 +19,6 @@ resource "aws_instance" "http" {
   subnet_id = aws_subnet.http.id
   user_data = file("scripts/first-boot-http.sh")
   tags = {
-    Name = each.key
+    Name = "${var.environment}-${each.key}"
   }
 }

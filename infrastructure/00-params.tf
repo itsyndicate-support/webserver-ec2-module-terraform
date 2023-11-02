@@ -18,7 +18,7 @@ variable "network_http" {
 # Set number of instance
 variable "http_instance_names" {
   type    = set(string)
-  default = ["${var.environment}-instance-http-1", "${var.environment}-instance-http-2"]
+  default = ["instance-http-1", "instance-http-2"]
 }
 
 #### DB PARAMS
@@ -33,7 +33,7 @@ variable "network_db" {
 # Set number of instance
 variable "db_instance_names" {
   type    = set(string)
-  default = ["${var.environment}-instance-db-1", "${var.environment}-instance-db-2"]
+  default = ["instance-db-1", "instance-db-2"]
 }
 
 variable "environment" {
