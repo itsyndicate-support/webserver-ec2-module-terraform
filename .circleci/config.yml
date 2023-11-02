@@ -22,8 +22,7 @@ jobs:
             else
               echo "TF_VAR_ENVIRONMENT=test" >> .env
             fi
-            ls -a
-            cat .env
+            echo $TF_VAR_ENVIRONMENT
       - run:
           name: Terraform Init & Validate & Plan
           command: |
