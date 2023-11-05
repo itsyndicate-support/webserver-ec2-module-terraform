@@ -4,6 +4,7 @@ orbs:
 jobs:  
   tfsec-tests:
     executor: tfsec/default
+    resource_class: wexire/terraform-deploy
     steps:
       - checkout
       - tfsec/scan:
@@ -12,6 +13,7 @@ jobs:
   terraform-setup:
     docker:
       - image: hashicorp/terraform
+    resource_class: wexire/terraform-deploy
     steps:
       - checkout
       - run:
@@ -37,6 +39,7 @@ jobs:
   terraform-apply:
     docker:
       - image: hashicorp/terraform
+    resource_class: wexire/terraform-deploy
     steps:
       - attach_workspace:
           at: ~/project
@@ -50,6 +53,7 @@ jobs:
   infrastructure-test:
     docker:
       - image: golang:1.21.3
+    resource_class: wexire/terraform-deploy
     steps:
       - attach_workspace:
           at: ~/project
@@ -66,6 +70,7 @@ jobs:
   terraform-destroy:
     docker:
       - image: hashicorp/terraform
+    resource_class: wexire/terraform-deploy
     steps:
       - attach_workspace:
           at: ~/project
