@@ -16,6 +16,7 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
+      - run: pwd
       - run:
           name: Set environment variables
           command: |
@@ -31,10 +32,9 @@ jobs:
               && cd infrastructure \
               && terraform init \
               && terraform validate \
-              && terraform plan \
-      - run: sudo -i
+              && terraform plan 
       - persist_to_workspace:
-          root: /home/ubuntu
+          root: .
           paths:
             - .
   terraform-apply:
@@ -42,12 +42,12 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: /home/ubuntu
+          at: .
       - run:
           name: Apply Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
-          root: /home/ubuntu
+          root: .
           paths:
             - .
   infrastructure-test:
@@ -55,7 +55,7 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: /home/ubuntu
+          at: .
       - run:
           name: Install Terraform
           command: chmod +x install_terraform.sh && ./install_terraform.sh
@@ -71,7 +71,7 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: /home/ubuntu
+          at: .
       - run: 
           name: Destroy Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
