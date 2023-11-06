@@ -7,12 +7,12 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
+      - run: ls -R
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-setup:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
@@ -33,30 +33,28 @@ jobs:
               && terraform validate \
               && terraform plan \
       - persist_to_workspace:
-          root: ~/project
+          root: /home/ubuntu
           paths:
             - .
   terraform-apply:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
+          at: /home/ubuntu
       - run:
           name: Apply Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
-          root: ~/project
+          root: /home/ubuntu
           paths:
             - .
   infrastructure-test:
-    docker:
-      - image: golang:1.21.3
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
+          at: /home/ubuntu
       - run:
           name: Install Terraform
           command: chmod +x install_terraform.sh && ./install_terraform.sh
@@ -68,12 +66,11 @@ jobs:
               && go mod tidy \
               && go test
   terraform-destroy:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
+          at: /home/ubuntu
       - run: 
           name: Destroy Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
