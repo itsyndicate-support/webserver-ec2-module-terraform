@@ -1,0 +1,95 @@
+version: 2.1
+orbs:
+  tfsec: mycodeself/tfsec@1.1.0
+jobs:  
+  tfsec-tests:
+    executor: tfsec/default
+    resource_class: wexire/deploy-terraform
+    steps:
+      - checkout
+      - tfsec/scan:
+          directory: infrastructure
+          exclude-checks: GEN001,GCP001,GCP002
+  terraform-setup:
+    machine: true
+    resource_class: wexire/deploy-terraform
+    steps:
+      - checkout
+      - run:
+          name: Set environment variables
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              echo "TF_VAR_ENVIRONMENT=prod" >> .env
+            else
+              echo "TF_VAR_ENVIRONMENT=test" >> .env
+            fi
+      - run:
+          name: Terraform Init & Validate & Plan
+          command: |
+            export $(cat .env) \
+              && cd infrastructure \
+              && terraform init \
+              && terraform validate \
+              && terraform plan 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  terraform-apply:
+    machine: true
+    resource_class: wexire/deploy-terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Apply Terraform Infrastructure
+          command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  infrastructure-test:
+    machine: true
+    resource_class: wexire/deploy-terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Test Infrastructure
+          command: |
+            cd test \
+              && go mod init github.com/wexire/webserver-ec2-module-terraform \
+              && go mod tidy \
+              && go test
+  terraform-destroy:
+    machine: true
+    resource_class: wexire/deploy-terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run: 
+          name: Destroy Terraform Infrastructure
+          command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
+  
+workflows:
+  tf-test-deploy:
+    jobs:
+      - tfsec-tests
+      - terraform-setup
+      - approve_apply:
+          type: approval
+          requires:
+            - terraform-setup
+      - terraform-apply:
+          requires:
+            - approve_apply
+      - infrastructure-test:
+          requires:
+            - terraform-apply
+      - approve_destroy:
+          type: approval
+          requires:
+            - infrastructure-test
+      - terraform-destroy:
+          requires:
+            - approve_destroy
