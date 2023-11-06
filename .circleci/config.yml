@@ -7,14 +7,12 @@ jobs:
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
-      - run: ls -R
+      - run: pwd
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-setup:
-    docker:
-      - image: hashicorp/terraform
-        user: root
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
@@ -34,13 +32,13 @@ jobs:
               && terraform init \
               && terraform validate \
               && terraform plan \
+      - run: sudo -i
       - persist_to_workspace:
           root: /home/ubuntu
           paths:
             - .
   terraform-apply:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
@@ -53,8 +51,7 @@ jobs:
           paths:
             - .
   infrastructure-test:
-    docker:
-      - image: golang:1.21.3
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
@@ -70,8 +67,7 @@ jobs:
               && go mod tidy \
               && go test
   terraform-destroy:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
