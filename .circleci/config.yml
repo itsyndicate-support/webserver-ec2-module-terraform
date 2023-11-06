@@ -4,14 +4,15 @@ orbs:
 jobs:  
   tfsec-tests:
     executor: tfsec/default
+    resource_class: wexire/deploy-terraform
     steps:
       - checkout
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-setup:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
+    resource_class: wexire/deploy-terraform
     steps:
       - checkout
       - run:
@@ -29,33 +30,30 @@ jobs:
               && cd infrastructure \
               && terraform init \
               && terraform validate \
-              && terraform plan \
+              && terraform plan 
       - persist_to_workspace:
-          root: ~/project
+          root: .
           paths:
             - .
   terraform-apply:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
+    resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
+          at: .
       - run:
           name: Apply Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform apply -auto-approve
       - persist_to_workspace:
-          root: ~/project
+          root: .
           paths:
             - .
   infrastructure-test:
-    docker:
-      - image: golang:1.21.3
+    machine: true
+    resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
-      - run:
-          name: Install Terraform
-          command: chmod +x install_terraform.sh && ./install_terraform.sh
+          at: .
       - run:
           name: Test Infrastructure
           command: |
@@ -64,11 +62,11 @@ jobs:
               && go mod tidy \
               && go test
   terraform-destroy:
-    docker:
-      - image: hashicorp/terraform
+    machine: true
+    resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
-          at: ~/project
+          at: .
       - run: 
           name: Destroy Terraform Infrastructure
           command: export $(cat .env) && cd infrastructure && terraform destroy -auto-approve
