@@ -12,7 +12,9 @@ jobs:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-setup:
-    machine: true
+    docker:
+      - image: hashicorp/terraform
+        user: root
     resource_class: wexire/deploy-terraform
     steps:
       - checkout
@@ -37,7 +39,8 @@ jobs:
           paths:
             - .
   terraform-apply:
-    machine: true
+    docker:
+      - image: hashicorp/terraform
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
@@ -50,7 +53,8 @@ jobs:
           paths:
             - .
   infrastructure-test:
-    machine: true
+    docker:
+      - image: golang:1.21.3
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
@@ -66,7 +70,8 @@ jobs:
               && go mod tidy \
               && go test
   terraform-destroy:
-    machine: true
+    docker:
+      - image: hashicorp/terraform
     resource_class: wexire/deploy-terraform
     steps:
       - attach_workspace:
