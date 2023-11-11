@@ -9,15 +9,15 @@ orbs:
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
     tfsec-tests:
-    executor: tfsec/default
-    steps:
-      - checkout
-      - tfsec/scan:
-          directory: infrastrucuture
-          exclude-checks: GEN001,GCP001,GCP002
+      executor: tfsec/default
+      steps:
+        - checkout
+        - tfsec/scan:
+            directory: infrastrucuture
+            exclude-checks: GEN001,GCP001,GCP002
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  tests-workflow:
     jobs:
       - tfsec-tests
