@@ -11,6 +11,7 @@ jobs:
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
+
   terraform-init:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
@@ -31,7 +32,7 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: terraform
+          name: Terraform Validate && Plan
           command: |
             cd infrastructure  \
             && terraform validate \
@@ -40,6 +41,7 @@ jobs:
           root: .
           paths:
             - .
+
 workflows:
   #  tests-workflow:
   #    jobs:
@@ -47,4 +49,6 @@ workflows:
   terraform-workflow:
     jobs:
       - terraform-init
-      - terraform-validate
+      - terraform-validate:
+          requires:
+            - terraform-init
