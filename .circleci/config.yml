@@ -16,8 +16,7 @@ jobs:
             directory: infrastructure
             exclude-checks: GEN001,GCP001,GCP002
     terraform-init:
-      machine:
-        image: ubuntu-2004:202010-01
+      machine: true
       steps:
         - checkout
         - run:
