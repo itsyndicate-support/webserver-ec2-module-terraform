@@ -16,7 +16,8 @@ jobs:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
   terraform-init:
-    machine: true
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - checkout
       - run:
