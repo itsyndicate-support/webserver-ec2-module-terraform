@@ -8,20 +8,20 @@ orbs:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-    tfsec-tests:
-      executor: tfsec/default
-      steps:
-        - checkout
-        - tfsec/scan:
-            directory: infrastructure
-            exclude-checks: GEN001,GCP001,GCP002
-    terraform-init:
-      machine: true
-      steps:
-        - checkout
-        - run:
-            name: Terraform Init
-            command: cd infrastructure && terraform init
+  tfsec-tests:
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan:
+          directory: infrastructure
+          exclude-checks: GEN001,GCP001,GCP002
+  terraform-init:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Terraform Init
+          command: cd infrastructure && terraform init
       - persist_to_workspace:
           root: .
           paths:
@@ -29,9 +29,9 @@ jobs:
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-#  tests-workflow:
-#    jobs:
-#      - tfsec-tests
+  #  tests-workflow:
+  #    jobs:
+  #      - tfsec-tests
   terraform-workflow:
     jobs:
       - terraform-init
