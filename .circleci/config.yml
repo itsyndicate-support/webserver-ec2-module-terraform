@@ -19,7 +19,7 @@ jobs:
       - checkout
       - run:
           name: Terraform Init
-          command: cd infrastructure && terraform init
+          command: cd infrastructure && terraform init -input=false
       - persist_to_workspace:
           root: .
           paths:
@@ -36,11 +36,33 @@ jobs:
           command: |
             cd infrastructure  \
             && terraform validate \
-            && terraform plan
+            && terraform plan -out tfapply
       - persist_to_workspace:
           root: .
           paths:
             - .
+
+  terraform-apply:
+    machine: true
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Apply
+          command: cd infrastructure && terraform apply -auto-approve
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-destroy:
+    machine: true
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Destroy Terraform Infrastructure
+          command: cd infrastructure && terraform destroy -auto-approve
 
 workflows:
   #  tests-workflow:
@@ -52,3 +74,17 @@ workflows:
       - terraform-validate:
           requires:
             - terraform-init
+      - approve-terraform-apply:
+          type: approval
+          requires:
+            - terraform-validate
+      - terraform-apply:
+          requires:
+            - approve-terraform-apply
+      - approve-terraform-destroy:
+          type: approval
+          requires:
+            - terraform-apply
+      - terraform-destroy:
+          requires:
+            - approve-terraform-destroy
