@@ -3,7 +3,7 @@
 version: 2.1
 
 orbs:
-  tfsec: mycodeself/tfsec-orb@1.1.0
+  tfsec: mycodeself/tfsec@1.1.0
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
