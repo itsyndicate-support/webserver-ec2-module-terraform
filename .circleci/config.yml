@@ -43,7 +43,8 @@ jobs:
             - .
 
   terraform-apply:
-    machine: true
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
@@ -56,7 +57,8 @@ jobs:
             - .
 
   terraform-destroy:
-    machine: true
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
