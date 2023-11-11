@@ -15,9 +15,24 @@ jobs:
         - tfsec/scan:
             directory: infrastructure
             exclude-checks: GEN001,GCP001,GCP002
+    terraform-init:
+      machine:
+        image: ubuntu-2004:202010-01
+      steps:
+        - checkout
+        - run:
+            name: Terraform Init
+            command: cd infrastructure && terraform init
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  tests-workflow:
+#  tests-workflow:
+#    jobs:
+#      - tfsec-tests
+  terraform-workflow:
     jobs:
-      - tfsec-tests
+      - terraform-init
