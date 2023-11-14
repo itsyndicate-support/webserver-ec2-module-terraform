@@ -1,6 +1,18 @@
 version: 2.1
 
 jobs:
+  run-pre-tests:
+    working_directory: /src
+    docker:
+      - image: ghcr.io/aquasecurity/tfsec-ci:v1.28.4
+    steps:
+      - checkout
+      - run:
+          name: tfsec tests
+          command: |
+            aquasec/tfsec --tfvars-file /src/terraform.tfvars /src/infrastructure
+
+
   plan-apply:
     working_directory: /tmp/project
     docker:
@@ -85,7 +97,10 @@ workflows:
   version: 2
   plan_approve_apply:
     jobs:
-      - plan-apply
+      - run-pre-tests
+      - plan-apply:
+          requires:
+            - run-pre-tests
       - hold-apply:
           type: approval
           requires:
