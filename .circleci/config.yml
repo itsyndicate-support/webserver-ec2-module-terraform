@@ -4,7 +4,7 @@ jobs:
   run-pre-tests:
     working_directory: /src
     docker:
-      - image: ghcr.io/aquasecurity/tfsec-ci:v1.28.4
+      - image: ivanopulo/tfseq-cicd-git:0.0.1
     steps:
       - checkout
       - run:
