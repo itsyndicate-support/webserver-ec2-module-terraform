@@ -45,7 +45,7 @@ jobs:
       - run:
           name: terratest
           command: |
-            go test infra_test.go
+            go test terratest/infra_test.go
       - persist_to_workspace:
           root: .
           paths:
