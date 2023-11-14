@@ -36,7 +36,7 @@ jobs:
           paths:
             - .
 
-    run-tests:
+  run-tests:
     docker:
       - image: ivanopulo/terratest:0.0.3
     steps:
@@ -92,6 +92,9 @@ workflows:
       - apply:
           requires:
             - hold-apply
+      - run-tests:
+          requires:
+            - apply
       - plan-destroy:
           requires:
             - apply
