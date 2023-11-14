@@ -38,14 +38,14 @@ jobs:
 
   run-tests:
     docker:
-      - image: ivanopulo/terratest:0.0.3
+      - image: ivanopulo/terratest:0.0.4
     steps:
       - attach_workspace:
-          at: ./terratest
+          at: .
       - run:
           name: terratest
           command: |
-            go test terratest/infra_test.go
+            go test infra_test.go
       - persist_to_workspace:
           root: .
           paths:
