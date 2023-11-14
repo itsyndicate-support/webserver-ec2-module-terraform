@@ -41,10 +41,14 @@ jobs:
       - image: ivanopulo/terratest:0.0.4
     steps:
       - attach_workspace:
-          at: .
+          at: /go/src/terratest
       - run:
           name: terratest
           command: |
+            ls -la /go
+            ls -la /go/src
+            ls -la /go/src/terratest
+            ls -la .
             go test infra_test.go
       - persist_to_workspace:
           root: .
