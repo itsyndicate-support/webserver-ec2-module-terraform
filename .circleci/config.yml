@@ -41,7 +41,7 @@ jobs:
       - image: ivanopulo/terratest:0.0.3
     steps:
       - attach_workspace:
-          at: .
+          at: ./terratest
       - run:
           name: terratest
           command: |
@@ -56,7 +56,7 @@ jobs:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
-          at: ./teratest
+          at: .
       - run:
           name: terraform create destroy plan
           command: |
