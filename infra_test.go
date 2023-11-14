@@ -2,6 +2,7 @@ package test
 
 import (
     "os"
+    "fmt"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -17,7 +18,7 @@ func TestInfrastructure(t *testing.T) {
 
     // Get variables from terraform.tfvars
     tfvarsFilePath := "../terratest/infrastructure/terraform.tfvars"
-    env := os.LookupEnv("CIRCLE_BRANCH")
+    env, ok := os.LookupEnv("CIRCLE_BRANCH")
 
     vars := map[string]interface{}{
         "http_instance_names": addEnvPrefix(env, terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "http_instance_names")),
@@ -54,7 +55,7 @@ func TestInfrastructure(t *testing.T) {
 func addEnvPrefix(env string, list []string) []string {
 	var result []string
 	for _, item := range list {
-		result = append(result, env+item)
+		result = append(result, env+"-"+item)
 	}
 	return result
 }
