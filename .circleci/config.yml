@@ -56,7 +56,7 @@ jobs:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
       - attach_workspace:
-          at: .
+          at: ./teratest
       - run:
           name: terraform create destroy plan
           command: |

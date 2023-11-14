@@ -11,11 +11,11 @@ func TestInfrastructure(t *testing.T) {
     t.Parallel()
 
     terraformOptions := &terraform.Options{
-        TerraformDir: "../src/infrastructure",
+        TerraformDir: "../terratest/infrastructure",
     }
 
     // Get variables from terraform.tfvars
-    tfvarsFilePath := "../src/infrastructure/terraform.tfvars"
+    tfvarsFilePath := "../terratest/infrastructure/terraform.tfvars"
     vars := map[string]interface{}{
         "http_instance_names": terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "http_instance_names"),
         "db_instance_names":   terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "db_instance_names"),
