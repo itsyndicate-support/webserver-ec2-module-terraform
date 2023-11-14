@@ -1,5 +1,10 @@
 # parms file for aws ec2 cloud
 
+variable "env" {
+  type = string
+  default = "dev"
+}
+
 #### VPC Network
 variable "vpc_cidr" {
   type    = string

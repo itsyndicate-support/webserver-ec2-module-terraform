@@ -16,13 +16,15 @@ jobs:
   plan-apply:
     working_directory: /tmp/project
     docker:
-      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+      - image: ivanopulo/terraform-envsubst:0.1
     steps:
       - checkout
       - run:
           name: terraform init & plan
           command: |
+            TF_VAR_env=$CIRCLE_BRANCH
             cd infrastructure
+            envsubst < backend.tf.tpl > backend-$TF_VAR_env.tf
             mkdir "$TF_VAR_pub_key_path"
             echo "$SSH_PUBLIC_KEY" > "$TF_VAR_pub_key_path"/"$TF_VAR_pub_key_filename"
             terraform init -input=false
@@ -59,10 +61,6 @@ jobs:
           name: terratest
           command: |
             go test infra_test.go
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   plan-destroy:
     docker:
