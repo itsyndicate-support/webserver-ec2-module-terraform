@@ -37,7 +37,7 @@ jobs:
             - .
 
   run-tests:
-  working_directory: /go/src/terratest
+    working_directory: /go/src/terratest
     docker:
       - image: ivanopulo/terratest:0.0.4
     steps:
