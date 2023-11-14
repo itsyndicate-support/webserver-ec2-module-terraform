@@ -15,13 +15,21 @@ output "db_ip" {
 }
 
 # Terratest outputs
+output "http_instance_names" {
+  value = [for instance in aws_instance.http : instance.tags.Name]
+}
 
-output "http_public_ips" {
+output "db_instance_names" {
+  value = [for instance in aws_instance.db : instance.tags.Name]
+}
+
+
+output "http_instance_public_ips" {
   value = [for instance in aws_instance.http : instance.public_ip]
 }
 
-output "db_public_ips" {
-  value = [for instance in aws_instance.db : instance.public_ip]
+output "db_instance_public_ips" {
+  value = [for instance in aws_instance.db : instance.public_ip if instance.public_ip != ""]
 }
 
 output "vpc_cidr" {

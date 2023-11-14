@@ -36,6 +36,21 @@ jobs:
           paths:
             - .
 
+    run-tests:
+    docker:
+      - image: ivanopulo/terratest:0.0.3
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terratest
+          command: |
+            go test infra_test.go
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   plan-destroy:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light

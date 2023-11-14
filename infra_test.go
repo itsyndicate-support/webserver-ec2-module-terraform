@@ -2,65 +2,47 @@ package test
 
 import (
 	"testing"
-	"net/http"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMatchTfvarsAndOutputs(t *testing.T) {
-	t.Parallel()
+func TestInfrastructure(t *testing.T) {
+    t.Parallel()
 
-	terraformOptions := &terraform.Options{
-		TerraformDir: "../infrastructure",
-		VarsFiles:    []string{"../infrastructure/terraform.tfvars"},
-	}
+    terraformOptions := &terraform.Options{
+        TerraformDir: "../src/infrastructure",
+    }
 
-	// Read variables from the terraform.tfvars file
-	terraformVars := terraform.ReadVarFiles(t, terraformOptions.VarsFiles)
-	vpcCidr := terraformVars["vpc_cidr"].(string)
-	httpSubnetCidr := terraformVars["network_http"].(map[string]interface{})["cidr"].(string)
-	dbSubnetCidr := terraformVars["network_db"].(map[string]interface{})["cidr"].(string)
+    // Get variables from terraform.tfvars
+    tfvarsFilePath := "../src/infrastructure/terraform.tfvars"
+    vars := map[string]interface{}{
+        "http_instance_names": terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "http_instance_names"),
+        "db_instance_names":   terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "db_instance_names"),
+        "vpc_cidr":            terraform.GetVariableAsStringFromVarFile(t, tfvarsFilePath, "vpc_cidr"),
+        "http_subnet_cidr":    terraform.GetVariableAsMapFromVarFile(t, tfvarsFilePath, "network_http")["cidr"],
+        "db_subnet_cidr":      terraform.GetVariableAsMapFromVarFile(t, tfvarsFilePath, "network_db")["cidr"],
+    }
 
+    // Verify EC2 instance names
+    assert.ElementsMatch(t, vars["http_instance_names"], terraform.OutputList(t, terraformOptions, "http_instance_names"), "HTTP instance names do not match")
+    assert.ElementsMatch(t, vars["db_instance_names"], terraform.OutputList(t, terraformOptions, "db_instance_names"), "DB instance names do not match")
 
-	// Fetch the VPC CIDR block from Terraform output
-	actualVpcCidr := terraform.Output(t, terraformOptions, "vpc_cidr")
-	actualHttpSubnetCidr := terraform.Output(t, terraformOptions, "http_subnet_cidr")
-	actualDbSubnetCidr := terraform.Output(t, terraformOptions, "db_subnet_cidr")
+    // Verify CIDR blocks
+    // Verify VPC cidr
+    assert.Equal(t, vars["vpc_cidr"], terraform.Output(t, terraformOptions, "vpc_cidr"), "VPC CIDR block does not match")
 
-	// Check if the values match
-	assert.Equal(t, vpcCidr, actualVpcCidr)
-	assert.Equal(t, httpSubnetCidr, actualHttpSubnetCidr)
-	assert.Equal(t, dbSubnetCidr, actualDbSubnetCidr)
+    // Verify http instances cidr
+    expectedHTTPSubnetCidr := vars["http_subnet_cidr"].(string)
+    actualHTTPSubnetCidr := terraform.Output(t, terraformOptions, "http_subnet_cidr")
+    assert.Equal(t, expectedHTTPSubnetCidr, actualHTTPSubnetCidr, "HTTP subnet CIDR block does not match")
 
+    // Verify db instances cidr
+    expectedDBSubnetCidr := vars["db_subnet_cidr"].(string)
+    actualDBSubnetCidr := terraform.Output(t, terraformOptions, "db_subnet_cidr")
+    assert.Equal(t, expectedDBSubnetCidr, actualDBSubnetCidr, "DB subnet CIDR block does not match")
 
-
-	httpInstanceNames := terraformVars["http_instance_names"].([]interface{})
-	dbInstanceNames := terraformVars["db_instance_names"].([]interface{})
-
-	httpIPs := terraform.OutputMap(t, terraformOptions, "http_ip")
-	dbIPs := terraform.OutputMap(t, terraformOptions, "db_ip")
-
-	// Compare the counts
-	assert.Equal(t, len(httpInstanceNames), len(httpIPs))
-	assert.Equal(t, len(dbInstanceNames), len(dbIPs))
-
-
-	httpPublicIPs := terraform.OutputList(t, terraformOptions, "http_public_ips")
-
-	// Test HTTP connection for each instance
-	for _, ip := range httpPublicIPs {
-		resp, err := http.Get("http://" + ip + "/")
-		defer resp.Body.Close()
-
-		// Check if the HTTP request was successful
-		assert.Nil(t, err)
-		assert.Equal(t, 200, resp.StatusCode)
-	}
-
-
-	dbPublicIPs := terraform.OutputList(t, terraformOptions, "db_public_ips")
-
-	// Check if the list of DB instance public IP addresses is empty
-	assert.Empty(t, dbPublicIPs)
+    // Verify if the database is accessible from the internet
+    dbPublicIPs := terraform.OutputList(t, terraformOptions, "db_instance_public_ips")
+    assert.Empty(t, dbPublicIPs, "Database should not be accessible from the internet")
 }

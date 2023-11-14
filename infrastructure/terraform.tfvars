@@ -13,3 +13,7 @@ network_db = {
 }
 
 db_instance_names = ["instance-db-1", "instance-db-2", "instance-db-3"]
+
+#pub_key_filename = "virt.pub"
+
+#pub_key_path = "/home/vanadium/.ssh/"
