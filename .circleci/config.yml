@@ -37,15 +37,16 @@ jobs:
             - .
 
   run-tests:
+  working_directory: /go/src/terratest
     docker:
       - image: ivanopulo/terratest:0.0.4
     steps:
       - attach_workspace:
-          at: /go/src/terratest
+          at: .
       - run:
           name: terratest
           command: |
-            go test /go/src/terratest/infra_test.go
+            go test infra_test.go
       - persist_to_workspace:
           root: .
           paths:
