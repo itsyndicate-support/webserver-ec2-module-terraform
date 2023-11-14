@@ -10,7 +10,7 @@ jobs:
       - run:
           name: tfsec tests
           command: |
-            tfsec --tfvars-file /src/terraform.tfvars /src/infrastructure
+            tfsec --tfvars-file infrastructure/terraform.tfvars infrastructure
 
 
   plan-apply:
