@@ -60,6 +60,7 @@ jobs:
       - run:
           name: terratest
           command: |
+            TF_VAR_env=$CIRCLE_BRANCH
             go test infra_test.go
 
   plan-destroy:

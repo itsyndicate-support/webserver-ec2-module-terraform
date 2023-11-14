@@ -1,6 +1,7 @@
 package test
 
 import (
+    "os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -16,9 +17,11 @@ func TestInfrastructure(t *testing.T) {
 
     // Get variables from terraform.tfvars
     tfvarsFilePath := "../terratest/infrastructure/terraform.tfvars"
+    env := os.Getenv("TF_VAR_env")
+	assert.NotEmpty(t, env, "TF_VAR_env should not be empty")
     vars := map[string]interface{}{
-        "http_instance_names": terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "http_instance_names"),
-        "db_instance_names":   terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "db_instance_names"),
+        "http_instance_names": addEnvPrefix(env, terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "http_instance_names")),
+		"db_instance_names":   addEnvPrefix(env, terraform.GetVariableAsListFromVarFile(t, tfvarsFilePath, "db_instance_names")),
         "vpc_cidr":            terraform.GetVariableAsStringFromVarFile(t, tfvarsFilePath, "vpc_cidr"),
         "http_subnet_cidr":    terraform.GetVariableAsMapFromVarFile(t, tfvarsFilePath, "network_http")["cidr"],
         "db_subnet_cidr":      terraform.GetVariableAsMapFromVarFile(t, tfvarsFilePath, "network_db")["cidr"],
@@ -45,4 +48,13 @@ func TestInfrastructure(t *testing.T) {
     // Verify if the database is accessible from the internet
     dbPublicIPs := terraform.OutputList(t, terraformOptions, "db_instance_public_ips")
     assert.Empty(t, dbPublicIPs, "Database should not be accessible from the internet")
+}
+
+
+func addEnvPrefix(env string, list []string) []string {
+	var result []string
+	for _, item := range list {
+		result = append(result, env+item)
+	}
+	return result
 }
