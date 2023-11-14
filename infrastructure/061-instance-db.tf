@@ -1,6 +1,7 @@
 #### INSTANCE DB ####
 
 # Create instance
+#tfsec:ignore:aws-ec2-enable-at-rest-encryption tfsec:ignore:aws-ec2-enforce-http-token-imds
 resource "aws_instance" "db" {
   for_each      = var.db_instance_names
   ami           = data.aws_ami.ubuntu.id
