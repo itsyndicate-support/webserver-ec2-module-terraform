@@ -11,6 +11,10 @@ jobs:
       - tfsec/scan:
           directory: infrastructure
           exclude-checks: GEN001,GCP001,GCP002
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
   terraform-init:
     docker:
@@ -56,6 +60,22 @@ jobs:
           paths:
             - .
 
+  infrastructure-test:
+    working_directory: /go/src/terratest
+    docker:
+      - image: ivanopulo/terratest:0.0.4
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terratest
+          command: |
+            go test infrastructure-test.go
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   terraform-destroy:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
@@ -83,6 +103,12 @@ workflows:
       - terraform-apply:
           requires:
             - approve-terraform-apply
+      - approve-infrastructure-test:
+          requires:
+            - terraform-apply
+      - infrastructure-test:
+          requires:
+            - approve-infrastructure-test
       - approve-terraform-destroy:
           type: approval
           requires:
