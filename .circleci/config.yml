@@ -68,11 +68,10 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: terratest
+          name: cd
           command: |
-            cd test \
-              && ls -l
-              && go infrastructure-test.go
+            cd test
+            go infrastructure-test.go
       - persist_to_workspace:
           root: .
           paths:
