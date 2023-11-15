@@ -87,9 +87,6 @@ jobs:
           command: cd infrastructure && terraform destroy -auto-approve
 
 workflows:
-  #  tests-workflow:
-  #    jobs:
-  #      - tfsec-tests
   terraform-workflow:
     jobs:
       - terraform-init
@@ -104,6 +101,7 @@ workflows:
           requires:
             - approve-terraform-apply
       - approve-infrastructure-test:
+          type: approval
           requires:
             - terraform-apply
       - infrastructure-test:
