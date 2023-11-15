@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
+  go: circleci/go@1.7.3
 
 jobs:
   tfsec-tests:
@@ -61,9 +62,8 @@ jobs:
             - .
 
   infrastructure-test:
-    working_directory: /go/src/terratest
     docker:
-      - image: ivanopulo/terratest:0.0.4
+      - image: cimg/go:1.21.4
     steps:
       - attach_workspace:
           at: .
