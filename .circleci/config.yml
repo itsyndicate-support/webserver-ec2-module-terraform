@@ -1,0 +1,126 @@
+version: 2.1
+
+jobs:
+  run-pre-tests:
+    working_directory: /src
+    docker:
+      - image: ivanopulo/tfseq-cicd-git:0.0.1
+    steps:
+      - checkout
+      - run:
+          name: tfsec tests
+          command: |
+            tfsec --tfvars-file infrastructure/terraform.tfvars infrastructure
+
+
+  plan-apply:
+    working_directory: /tmp/project
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: terraform init & plan
+          command: |
+            cd infrastructure
+            mkdir "$TF_VAR_pub_key_path"
+            echo "$SSH_PUBLIC_KEY" > "$TF_VAR_pub_key_path"/"$TF_VAR_pub_key_filename"
+            terraform init -input=false
+            terraform plan -out tfapply -var-file terraform.tfvars
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  apply:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform
+          command: |
+            cd infrastructure
+            terraform apply -auto-approve tfapply
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  run-tests:
+    working_directory: /go/src/terratest
+    docker:
+      - image: ivanopulo/terratest:0.0.4
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terratest
+          command: |
+            go test infra_test.go
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  plan-destroy:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform create destroy plan
+          command: |
+            cd infrastructure
+            terraform plan -destroy -out tfdestroy -var-file terraform.tfvars
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  destroy:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform destroy
+          command: |
+            cd infrastructure
+            terraform apply -auto-approve tfdestroy
+
+
+workflows:
+  version: 2
+  plan_approve_apply:
+    jobs:
+      - run-pre-tests
+      - plan-apply:
+          requires:
+            - run-pre-tests
+      - hold-apply:
+          type: approval
+          requires:
+            - plan-apply
+      - apply:
+          requires:
+            - hold-apply
+      - run-tests:
+          requires:
+            - apply
+      - plan-destroy:
+          requires:
+            - apply
+      - hold-destroy:
+          type: approval
+          requires:
+            - plan-destroy
+      - destroy:
+          requires:
+            - hold-destroy
+
+
+

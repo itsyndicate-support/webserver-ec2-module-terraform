@@ -36,3 +36,14 @@ variable "db_instance_names" {
   default = ["instance-db-1", "instance-db-2", "instance-db-3"]
 }
 
+### SSH PARAMS
+
+variable "pub_key_path" {
+  type        = string
+  description = "Specify a path to the public ssh key"
+}
+
+variable "pub_key_filename" {
+  type        = string
+  description = "Specify a filename of the public ssh key"
+}
