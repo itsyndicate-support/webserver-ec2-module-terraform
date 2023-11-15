@@ -70,7 +70,10 @@ jobs:
       - run:
           name: terratest
           command: |
-            go test infrastructure-test.go
+            cd test \
+              && go mod init github.com/YapieRT/webserver-ec2-module-terraform \
+              && go mod tidy \
+              && go test
       - persist_to_workspace:
           root: .
           paths:
