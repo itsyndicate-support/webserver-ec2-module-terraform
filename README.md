@@ -92,3 +92,13 @@ The comparing part looks the same:
 ...
 ```
 Other parts of testing don't require any changes.
+
+### Usage
+
+The process of creating new environment is pretty simple:
+
+- run `git clone git@github.com:digitalake/webserver-ec2-module-terraform.git`
+- run `git checkout -b envname`
+- run `git push origin envname`
+
+The environment is created using specified branch name.
