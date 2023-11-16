@@ -1,14 +1,12 @@
 
 output "httpIP" {
   value = {
-    for instance in aws_instance.http : instance.public_ip
+    for [for instance in aws_instance.http : instance.public_ip]
   }
 }
 
 output "dbIP" {
-  value = {
-    for instance in aws_instance.db : instance.public_ip
-  }
+  value = [for instance in aws_instance.db : instance.public_ip]
 }
 output "httpSubnet" {
   value = aws_subnet.http.id
