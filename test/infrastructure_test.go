@@ -29,5 +29,5 @@ func TestTerraformDeployment(t *testing.T) {
 	dbInstances := terraform.OutputList(t, terraformOptions, "dbIP")
 
 	assert.Equal(t, 2, len(httpInstances), "Expected 2 HTTP instances to be created")
-	assert.Equal(t, 2, len(dbInstances), "Expected 2 DB instances to be created")
+	assert.Equal(t, 3, len(dbInstances), "Expected 3 DB instances to be created")
 }
