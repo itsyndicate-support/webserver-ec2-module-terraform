@@ -71,7 +71,7 @@ jobs:
           name: cd
           command: |
             cd test
-            go mod init github.com/wexire/webserver-ec2-module-terraform \
+            go mod init github.com/YapieRT/webserver-ec2-module-terraform \
             && go mod tidy 
             go run infrastructure-test.go
       - persist_to_workspace:
