@@ -25,8 +25,8 @@ func TestTerraformDeployment(t *testing.T) {
 	assert.NotEmpty(t, dbSubnet, "Expected the DB subnet to be created")
 
 	// Check EC2 instances for creation.
-	httpInstances := terraform.OutputList(t, terraformOptions, "http_ip")
-	dbInstances := terraform.OutputList(t, terraformOptions, "db_ip")
+	httpInstances := terraform.OutputList(t, terraformOptions, "httpIP")
+	dbInstances := terraform.OutputList(t, terraformOptions, "dbIP")
 
 	assert.Equal(t, 2, len(httpInstances), "Expected 2 HTTP instances to be created")
 	assert.Equal(t, 2, len(dbInstances), "Expected 2 DB instances to be created")

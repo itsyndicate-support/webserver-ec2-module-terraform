@@ -1,22 +1,22 @@
 
-output "http_ip" {
+output "httpIP" {
   value = {
     for instance in aws_instance.http :
     instance.id => instance.private_ip
   }
 }
 
-output "db_ip" {
+output "dbIP" {
   value = {
     for instance in aws_instance.db :
     instance.id => instance.private_ip
   }
 }
-output "http_subnet" {
+output "httpSubnet" {
   value = aws_subnet.http.id
 }
 
-output "db_subnet" {
+output "dbSubnet" {
   value = aws_subnet.db.id
 }
 
