@@ -68,7 +68,7 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: cd
+          name: Test
           command: |
             cd test
             go mod init github.com/YapieRT/webserver-ec2-module-terraform \
