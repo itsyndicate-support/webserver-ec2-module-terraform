@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   tfsec: mycodeself/tfsec@1.1.0
-  go: circleci/go@1.7.3
 
 jobs:
   tfsec-tests:
@@ -63,7 +62,7 @@ jobs:
 
   infrastructure-test:
     docker:
-      - image: cimg/go:1.21.4
+      - image: hashicorp/terraform:full
     steps:
       - attach_workspace:
           at: .
