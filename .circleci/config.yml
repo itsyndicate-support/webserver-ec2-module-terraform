@@ -62,7 +62,7 @@ jobs:
 
   infrastructure-test:
     docker:
-      - image: hashicorp/terraform:full
+      - image: hashicorp/terraform
     steps:
       - attach_workspace:
           at: .
