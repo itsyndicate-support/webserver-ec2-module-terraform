@@ -1,4 +1,3 @@
-# Display dns information
 
 output "http_ip" {
   value = {
@@ -12,4 +11,15 @@ output "db_ip" {
     for instance in aws_instance.db :
     instance.id => instance.private_ip
   }
+}
+output "http_subnet" {
+  value = aws_subnet.http.id
+}
+
+output "db_subnet" {
+  value = aws_subnet.db.id
+}
+
+output "vpc" {
+  value = aws_vpc.terraform.id
 }
