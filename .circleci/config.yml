@@ -6,6 +6,7 @@ orbs:
 jobs:
   tfsec-tests:
     executor: tfsec/default
+    resource_class: yapiert/terraform
     steps:
       - checkout
       - tfsec/scan:
@@ -19,6 +20,7 @@ jobs:
   terraform-init:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
     steps:
       - checkout
       - run:
@@ -32,6 +34,7 @@ jobs:
   terraform-validate:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
     steps:
       - attach_workspace:
           at: .
@@ -49,6 +52,7 @@ jobs:
   terraform-apply:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
     steps:
       - attach_workspace:
           at: .
@@ -63,6 +67,7 @@ jobs:
   infrastructure-test:
     docker:
       - image: golang:1.21.3
+    resource_class: yapiert/terraform
     steps:
       - attach_workspace:
           at: .
@@ -102,6 +107,7 @@ jobs:
   terraform-destroy:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
     steps:
       - attach_workspace:
           at: .
