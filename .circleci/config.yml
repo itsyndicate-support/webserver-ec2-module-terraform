@@ -1,0 +1,165 @@
+version: 2.1
+
+orbs:
+  tfsec: mycodeself/tfsec@1.1.0
+
+jobs:
+  tfsec-tests:
+    executor: tfsec/default
+    resource_class: yapiert/terraform
+    steps:
+      - checkout
+      - tfsec/scan:
+          directory: infrastructure
+          exclude-checks: GEN001,GCP001,GCP002
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-init:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
+    steps:
+      - checkout
+      - run:
+          name: Set environment variables
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              echo "TF_VAR_ENV=prod" >> .env
+            fi
+            if [ "${CIRCLE_BRANCH}" == "test" ]; then
+              echo "TF_VAR_ENV=test" >> .env
+            fi
+
+      - run:
+          name: Terraform Init
+          command: |
+            export $(cat .env)
+            cd infrastructure
+            terraform init -input=false
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-validate:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Validate && Plan
+          command: |
+            export $(cat .env)
+            cd infrastructure  
+            terraform validate 
+            terraform plan -out tfapply
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-apply:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Terraform Apply
+          command: |
+            export $(cat .env)
+            cd infrastructure
+            terraform apply -auto-approve
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  infrastructure-test:
+    docker:
+      - image: golang:1.21.3
+    resource_class: yapiert/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install Terraform
+          command: |
+            apt-get update && apt-get install -y gnupg software-properties-common 
+
+            wget -O- https://apt.releases.hashicorp.com/gpg | \
+            gpg --dearmor | \
+            tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+            gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+            --fingerprint
+
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+            https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+            tee /etc/apt/sources.list.d/hashicorp.list
+
+            apt update
+
+            apt-get install terraform -y
+
+      - run:
+          name: Test
+          command: |
+            cd test 
+            go mod init github.com/YapieRT/webserver-ec2-module-terraform
+            go mod tidy 
+            go test infrastructure_test.go
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-destroy:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    resource_class: yapiert/terraform
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Destroy Terraform Infrastructure
+          command: |
+            export $(cat .env)
+            cd infrastructure
+            terraform destroy -auto-approve
+
+workflows:
+  terraform-workflow:
+    jobs:
+      - terraform-init
+      - terraform-validate:
+          requires:
+            - terraform-init
+      - approve-terraform-apply:
+          type: approval
+          requires:
+            - terraform-validate
+      - terraform-apply:
+          requires:
+            - approve-terraform-apply
+      - approve-infrastructure-test:
+          type: approval
+          requires:
+            - terraform-apply
+      - infrastructure-test:
+          requires:
+            - approve-infrastructure-test
+      - approve-terraform-destroy:
+          type: approval
+          requires:
+            - terraform-apply
+      - terraform-destroy:
+          requires:
+            - approve-terraform-destroy

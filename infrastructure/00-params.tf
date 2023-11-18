@@ -36,3 +36,6 @@ variable "db_instance_names" {
   default = ["instance-db-1", "instance-db-2", "instance-db-3"]
 }
 
+# Set environment variable 
+variable "ENV" {
+}
