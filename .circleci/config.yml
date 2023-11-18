@@ -24,8 +24,21 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Set environment variables
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              echo "TF_VAR_ENV=prod" >> .env
+            fi
+            if [ "${CIRCLE_BRANCH}" == "test" ]; then
+              echo "TF_VAR_ENV=test" >> .env
+            fi
+
+      - run:
           name: Terraform Init
-          command: cd infrastructure && terraform init -input=false
+          command: |
+            export $(cat .env)
+            cd infrastructure
+            terraform init -input=false
       - persist_to_workspace:
           root: .
           paths:
@@ -41,9 +54,10 @@ jobs:
       - run:
           name: Terraform Validate && Plan
           command: |
-            cd infrastructure  \
-            && terraform validate \
-            && terraform plan -out tfapply
+            export $(cat .env)
+            cd infrastructure  
+            terraform validate 
+            terraform plan -out tfapply
       - persist_to_workspace:
           root: .
           paths:
@@ -58,7 +72,10 @@ jobs:
           at: .
       - run:
           name: Terraform Apply
-          command: cd infrastructure && terraform apply -auto-approve
+          command: |
+            export $(cat .env)
+            cd Infrastructure
+            terraform apply -auto-approve
       - persist_to_workspace:
           root: .
           paths:
@@ -96,9 +113,9 @@ jobs:
           name: Test
           command: |
             cd test 
-            go mod init github.com/YapieRT/webserver-ec2-module-terraform \
-            && go mod tidy \
-            && go test infrastructure_test.go
+            go mod init github.com/YapieRT/webserver-ec2-module-terraform
+            go mod tidy 
+            go test infrastructure_test.go
       - persist_to_workspace:
           root: .
           paths:
@@ -113,7 +130,9 @@ jobs:
           at: .
       - run:
           name: Destroy Terraform Infrastructure
-          command: cd infrastructure && terraform destroy -auto-approve
+          command: |
+            cd infrastructure
+            terraform destroy -auto-approve
 
 workflows:
   terraform-workflow:

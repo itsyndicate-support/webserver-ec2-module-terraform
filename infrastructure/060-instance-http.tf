@@ -13,7 +13,7 @@ resource "aws_instance" "http" {
   subnet_id = aws_subnet.http.id
   user_data = file("scripts/first-boot-http.sh")
   tags = {
-    Name = each.key
+    Name = "${var.ENV}-${each.key}"
   }
   metadata_options {
     http_tokens = "required"
