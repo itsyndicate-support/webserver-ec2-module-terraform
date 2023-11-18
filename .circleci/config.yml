@@ -131,6 +131,7 @@ jobs:
       - run:
           name: Destroy Terraform Infrastructure
           command: |
+            export $(cat .env)
             cd infrastructure
             terraform destroy -auto-approve
 
