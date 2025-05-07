@@ -1,0 +1,34 @@
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: stag
+  namespace: flux-system
+spec:
+  vars:
+  - name: env
+    value: stag
+  backendConfig:
+    customConfiguration: |
+      backend "s3" {
+        bucket                      = "phosphor-tfstates"
+        key                         = "stag/terraform.tfstate"
+        region                      = "us-east-1"
+      }
+  backendConfigsFrom:
+    - kind: Secret
+      name: terraform-s3-backend
+      keys:
+        - access_key
+        - secret_key
+      optional: false
+  interval: 1m0s
+  path: ./infrastructure
+  sourceRef:
+    kind: GitRepository
+    name: stag
+  approvePlan: auto
+  runnerPodTemplate:
+    spec:
+      envFrom:
+        - secretRef:
+            name: aws-credentials

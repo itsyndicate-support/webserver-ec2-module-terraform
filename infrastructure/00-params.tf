@@ -40,6 +40,15 @@ variable "db_instance_names" {
 variable "public_key" {
   type    = string
   description = "SSH public key to login into EC2 instance"
-  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com"
+  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChY1YyccpHHpZzKMz3WsxLpzg1QIaoi6K/67y/Vy1/VPkliVIJE0hydQW1Mp3HElgucZM9kKv86zbfrzzCcQHS7PttTFeIEhgl4r4Gr79ZSPVU3Mn6gzHpdpkj7SCUD9a0R5SSmOT8BAcZZDsDWVGgcbUuEkR4zBCurDw+VKfcEpUTRSgwEuh1bYyQd6FDE1vLztTP7GWc4c59wvNhYBDpYbBtlGOazmWioTCtvdY/zdm56G3KcnV+Q4fYApTlo81KgdpAGGz7rfJ8DoQWkOnIWz9xt3TDMCIhOOIuwd0Le6qUt2eBiTgUC6Brsi8arVGB1Ar7GZKtBOE3N3I5xUntpDaWsawAmXaU63Q6cumQEpc7sMcKRUbTWhKV1NhbfzG31XwcI1HhWkxYVm4Yr4Zr86DPwQm5hepCy3+gUUFNaCvHPDLoR/MU3bChsC4/w1Nn1PgnQ/1tOn8lRYJYCNrUW/4kABnxo6escRSyKkIlr6rGOdq0coc+wEpQhS1BG7E5qgujtQhRQgLcRYPQfmEULWitpgjxbOUwKYnMWo0XZrxO7T6VzIBuoi1nXmPMlnfGJOuAseCdcgw9mLlNLyZKYBn5TSqsxnhM+JQdObSASAU2am+XZlHuX0RHuqxNb/6RPDzwwhjTWmnJZVfUGtzfdKLkjnWMh1QSCzCdMMHaGw== volodymyrvoitovych11@gmail.com"
 }
 
+variable "public_key_name" {
+  type    = string
+  description = "SSH public key name "
+  default = "main-key"
+}
+variable "env" {
+  type = string
+  default = "production"
+}

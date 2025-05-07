@@ -13,7 +13,7 @@ resource "aws_instance" "http" {
   subnet_id = aws_subnet.http.id
   user_data = file("scripts/first-boot-http.sh")
   tags = {
-    Name = each.key
+    Name = "${var.env}-${each.key}"
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_eip" "public_http" {
   instance   = aws_instance.http[each.key].id
   depends_on = [aws_internet_gateway.gw]
   tags = {
-    Name = "public-http-${each.key}"
+    Name = "public-http-${var.env}-${each.key}"
   }
 }
 

@@ -1,0 +1,73 @@
+version: 2.1
+orbs:
+  tfsec: mycodeself/tfsec@1.1.0
+  go: circleci/go@1.7.3
+jobs:
+  pre-test:
+    resource_class: ewsaxyfkcp5g9tbybh5unx/test
+    executor: tfsec/default
+    steps:
+      - checkout
+      - tfsec/scan:
+          directory: ./infrastructure
+          exclude-checks: 'aws-ec2-require-vpc-flow-logs-for-all-vpcs,aws-ec2-enable-at-rest-encryption,aws-ec2-enforce-http-token-imds,aws-ec2-no-public-egress-sgr,aws-ec2-no-public-ingress-sgr,aws-ec2-add-description-to-security-group-rule'
+
+  post-test:
+    resource_class: ewsaxyfkcp5g9tbybh5unx/test
+    executor:
+      name: go/default
+      tag: '1.19.2'
+    steps:
+      - checkout
+      - run: wget https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip
+      - run: sudo unzip terraform_1.8.3_linux_amd64.zip -d /usr/local/bin
+      - run: wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.58.5/terragrunt_linux_amd64
+      - run: cp terragrunt_linux_amd64 terragrunt
+      - run: chmod u+x terragrunt
+      - run: sudo mv terragrunt /usr/local/bin/terragrunt
+
+      - run:
+          name: terratest
+          command: |
+            cd terratest/test \
+              && go mod init terraformtest \
+              && go mod tidy \
+              && go test -v
+  Create-flux-env:
+    resource_class: ewsaxyfkcp5g9tbybh5unx/test
+    docker:
+      - image: cimg/base:2024.05
+    steps:
+      - run:
+          name: Updating Manifest files
+          command: |
+            git clone -b dev --single-branch https://github.com/phosphor-v/webserver-ec2-module-terraform.git
+            cd webserver-ec2-module-terraform
+            if [ -d "kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH" ]; then
+              echo "Configuration exist"
+            else
+              git config credential.helper 'cache --timeout=120'
+              git config user.email "volodymyrvoitovych11@gmail.com"
+              git config user.name "phosphor-v"
+              mkdir kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH
+              cp -rf kubernetes/fluxcd/repositories/infra-repo/apps/tf-app/* kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH/
+              sed -i "s/stag/$CIRCLE_BRANCH/g" kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH/terraform.yaml
+              sed -i "s/stag/$CIRCLE_BRANCH/g" kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH/gitrepository.yaml
+              git add kubernetes/fluxcd/repositories/infra-repo/clusters/dev-cluster/$CIRCLE_BRANCH/*
+              git commit -m "[ci skip] Auto-created flux $CIRCLE_BRANCH-enviroment"
+              git push -q https://${GITHUB_TOKEN}@github.com/phosphor-v/webserver-ec2-module-terraform.git dev
+            fi
+workflows:
+  version: 2
+  test-deployment:
+    jobs:
+      - pre-test
+      - post-test
+      - Create-flux-env:
+          requires:
+            - post-test
+          filters:
+            branches:
+              ignore:
+              - main
+              - dev

@@ -1,0 +1,4 @@
+agent:
+  resourceClasses:
+    namespace/my-rc:
+      token: xxx
