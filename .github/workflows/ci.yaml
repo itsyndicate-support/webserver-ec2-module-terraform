@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "feature", "week11task2" ]
+  pull_request:
+    branches: [ "main", "feature", "week11task2" ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  WORK_DIR: infrastructure
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Terrafrom
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Install and run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infrastructure
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install tflint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Run tflint
+        run: tflint -f compact
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Terraform Format
+        run: terraform fmt -check
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Commit & Push TF plan
+        uses: actions-js/push@v1.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+          message: "tfplan changed"
