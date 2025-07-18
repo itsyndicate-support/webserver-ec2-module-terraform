@@ -12,6 +12,20 @@ resource "aws_instance" "http" {
   ]
   subnet_id = aws_subnet.http.id
   user_data = file("scripts/first-boot-http.sh")
+
+  # Enforce IMDSv2
+  metadata_options {
+    http_tokens   = "required"
+    http_endpoint = "enabled"
+  }
+
+  # Encrypt root volume
+  root_block_device {
+    encrypted   = true
+    volume_size = 8
+    volume_type = "gp3"
+  }
+
   tags = {
     Name = each.key
   }

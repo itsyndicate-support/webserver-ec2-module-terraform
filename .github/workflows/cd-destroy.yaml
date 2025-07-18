@@ -1,0 +1,35 @@
+name: CD destroy infra
+
+on:
+  workflow_dispatch:
+
+env:
+  INFRA_DIR: infrastructure
+  AWS_REGION: eu-north-1
+
+jobs:
+  destroy-infra:
+    name: destroy whole infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Set AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform init
+        run: terraform init
+        working-directory: ${{ env.INFRA_DIR }}
+
+      - name: Terraform destroy
+        run: terraform destroy -auto-approve
+        working-directory: ${{ env.INFRA_DIR }}

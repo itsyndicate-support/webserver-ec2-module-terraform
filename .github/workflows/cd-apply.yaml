@@ -1,0 +1,45 @@
+name: CD apply infra
+
+on:
+  workflow_dispatch:
+
+env:
+  INFRA_DIR: infrastructure
+  AWS_REGION: eu-north-1
+  TESTS_DIR: infrastructure/test
+
+jobs:
+  apply-infra:
+    name: create infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Set AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform init
+        run: terraform init
+        working-directory: ${{ env.INFRA_DIR }}
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve
+        working-directory: ${{ env.INFRA_DIR }}
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.11'
+
+      - name: Run terratest
+        run: go test -v .
+        working-directory: ${{ env.TESTS_DIR }}
