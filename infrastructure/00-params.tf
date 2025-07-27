@@ -1,5 +1,9 @@
 # parms file for aws ec2 cloud
 
+locals {
+  infra_env = terraform.workspace != "dev" && terraform.workspace != "prod" ? "dev" : terraform.workspace
+}
+
 #### VPC Network
 variable "vpc_cidr" {
   type    = string
@@ -11,7 +15,8 @@ variable "network_http" {
   type = map(string)
   default = {
     subnet_name = "subnet_http"
-    cidr        = "192.168.1.0/24"
+    cidr-dev        = "192.168.1.0/24"
+    cidr-prod       = "192.168.3.0/24"
   }
 }
 
@@ -26,7 +31,8 @@ variable "network_db" {
   type = map(string)
   default = {
     subnet_name = "subnet_db"
-    cidr        = "192.168.2.0/24"
+    cidr-dev        = "192.168.2.0/24"
+    cidr-prod       = "192.168.4.0/24"
   }
 }
 

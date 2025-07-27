@@ -1,0 +1,12 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: webserver-runners
+  namespace: actions
+spec:
+  template:
+    spec:
+      repository: Sog0/webserver-ec2-module-terraform
+      labels:
+        - webserver-runner
+      env: []

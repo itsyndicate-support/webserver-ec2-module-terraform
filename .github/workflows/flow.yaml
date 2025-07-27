@@ -1,0 +1,90 @@
+name: Valdidate terraform infrastructure
+
+on:
+
+  workflow_dispatch:
+      inputs:
+        environment:
+          description: 'Environment to deploy'
+          required: true
+          default: 'dev'
+          type: choice
+          options:
+            - dev
+            - prod
+            - test
+
+  push:
+  pull_request:
+
+env:
+  TARGET_DIR: infrastructure
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
+
+jobs:
+  test:
+    runs-on: self-hosted
+    name: test infrastructure
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+      
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      - name: Download Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Terraform init
+        run: |
+          cd infrastructure 
+          terraform init 
+
+      - name: Select workspace
+        run: |
+          cd ${{ env.TARGET_DIR }}
+          terraform workspace select ${{ github.event.inputs.environment || 'dev' }} || terraform workspace new ${{ github.event.inputs.environment || 'dev' }}
+
+
+      - name: Check with tfsec
+        uses: aquasecurity/tfsec-action@v1.0.1
+        with:
+          working_directory: ${{ env.TARGET_DIR }}
+          soft_fail: true
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Init TFLint
+        run: | 
+          tflint --init --chdir=${{ env.TARGET_DIR }}
+          tflint --chdir=${{ env.TARGET_DIR }} || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GIT }}
+
+      - name: Terraform fmt
+        run: |
+          cd infrastructure 
+          terraform fmt 
+      
+      - name: Terraform validate
+        run: |
+          cd infrastructure 
+          terraform validate | true
+
+      - name: Terraform plan
+        run: |
+          cd infrastructure 
+          terraform plan
