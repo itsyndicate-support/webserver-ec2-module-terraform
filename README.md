@@ -19,3 +19,9 @@ This script will create:
 ```
 terraform destroy
 ```
+
+### Add new environment
+
+1. In ALL workflows (cd, ci, destroy) need to add to environment new option
+2. In infrastructure/backend add file with new terraform backend
+3. In infrastructure/vars add file with new variables

@@ -1,0 +1,92 @@
+name: CD
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (dev/prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+        
+      use_saved_plan:
+        description: 'Use saved plan (Or generate new one)'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  AWS_REGION: us-east-1
+  WORK_DIR: infrastructure
+  WORK_DIR_FOR_TEST: tests
+  TF_ENV: ${{ github.event.inputs.environment }}
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Terrafrom
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="backend/${TF_ENV}.hcl" \
+            -reconfigure
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Terraform Plan
+        if: ${{ github.event.inputs.use_saved_plan == 'false' }}
+        run: |
+          terraform plan \
+            -var-file="vars/${TF_ENV}.tfvars" \
+            -out="plans/${TF_ENV}.tfplan"
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Commit & Push TF plan
+        if: ${{ github.event.inputs.use_saved_plan == 'false' }}
+        uses: actions-js/push@v1.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+          message: "tfplan changed" 
+
+      - name: Terraform apply saved plan
+        run: |
+          terraform apply \
+            --auto-approve \
+            -var-file="vars/${TF_ENV}.tfvars" \
+            plans/${TF_ENV}.tfplan
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.5.0
+      
+      - name: Download Go Modules
+        run: go mod download
+        working-directory: ${{ env.WORK_DIR_FOR_TEST }}
+
+      - name: Run Go Tests
+        working-directory: ${{ env.WORK_DIR_FOR_TEST }}
+        run: go test -v
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -2,7 +2,7 @@
 
 # Create default ssh publique key
 resource "aws_key_pair" "user_key" {
-  key_name   = "test-key"
+  key_name   = "test-key-${var.env}"
   public_key = var.public_key
 }
 
