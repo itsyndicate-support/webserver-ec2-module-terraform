@@ -15,15 +15,16 @@ resource "aws_instance" "http" {
 
   depends_on = [aws_route_table_association.http]
   user_data  = file("scripts/first-boot-http.sh")
+  root_block_device {
+    encrypted = true
+  }
+
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = {
     Name = each.key
-    root_block_device {
-      encrypted = true
-     }
-
-    metadata_options {
-      http_tokens = "required"
-     }
   }
 }
 

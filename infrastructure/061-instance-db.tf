@@ -14,16 +14,16 @@ resource "aws_instance" "db" {
   associate_public_ip_address = true
 
   depends_on = [aws_route_table_association.db]
-  user_data  = file("scripts/first-boot-db.sh")
+  root_block_device {
+    encrypted = true
+  }
+
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = {
     Name = each.key
-    root_block_device {
-      encrypted = true
-    }
-
-    metadata_options {
-      http_tokens = "required"
-    }
   }
 }
 
