@@ -1,0 +1,39 @@
+
+name: Terraform Security Scan
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-scan:
+    name: Trivy Terraform Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: infrastructure
+          scanners: misconfig
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: table
