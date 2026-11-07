@@ -56,3 +56,18 @@ The state bucket, IAM role and OIDC provider were created separately and remain 
 - All three DB servers completed cloud-init, reported MariaDB as active, and successfully executed `SELECT VERSION()`.
 - A follow-up Terraform plan completed successfully.
 - The manual destroy workflow completed successfully.
+
+## Security checks and post-apply tests
+
+Both workflows run Terraform formatting and validation checks, TFLint, and Trivy. In the deployment workflow, these checks must pass before Terraform can generate a plan. If a check fails, subsequent deployment steps are skipped.
+
+The security changes enable EC2 root volume encryption, require IMDSv2, and limit outbound internet traffic to HTTP and HTTPS.
+
+Terratest runs automatically after a successful apply. It reads the existing Terraform outputs and queries AWS to check that:
+
+- Two HTTP instances and three database instances are running.
+- The VPC CIDR is `192.168.0.0/16`, with HTTP instances in `192.168.1.0/24` and database instances in `192.168.2.0/24`.
+- Every database instance allows inbound TCP/3306 only from the web security group. All attached security groups are checked, including rules covering multiple ports or all protocols.
+
+The tests use the same temporary AWS credentials as Terraform. To run them, select `apply` in the manual Terraform AWS workflow.
+
