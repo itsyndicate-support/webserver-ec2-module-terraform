@@ -10,8 +10,19 @@ resource "aws_instance" "http" {
     aws_security_group.administration.id,
     aws_security_group.web.id,
   ]
-  subnet_id = aws_subnet.http.id
-  user_data = file("scripts/first-boot-http.sh")
+  subnet_id                   = aws_subnet.http.id
+  associate_public_ip_address = true
+
+  depends_on = [aws_route_table_association.http]
+  user_data  = file("scripts/first-boot-http.sh")
+  root_block_device {
+    encrypted = true
+  }
+
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = {
     Name = each.key
   }
