@@ -26,6 +26,37 @@ jobs:
         with:
           terraform_version: 1.17.1
 
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init for Checks
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v5
+        with:
+          tflint_version: v0.59.1
+
+      - name: Initialize TFLint
+        run: tflint --config=../.tflint.hcl --init
+
+      - name: Run TFLint
+        run: tflint --config=../.tflint.hcl --minimum-failure-severity=warning
+
+      - name: Run Trivy
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/work" \
+            aquasec/trivy:0.65.0 \
+            fs \
+            --scanners misconfig \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            /work/infrastructure
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -36,7 +67,18 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
+        env:
+          TF_VAR_admin_ip: ${{ secrets.TF_VAR_admin_ip }}
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.3'
+
+      - name: Run Terratest
+        run: go test -v ./...
+        working-directory: tests

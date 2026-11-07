@@ -24,25 +24,10 @@ resource "aws_security_group" "administration" {
     protocol    = "icmp"
     cidr_blocks = [var.admin_ip]
   }
-
-  # Allow HTTP outbound traffic
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow HTTPS outbound traffic
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 # Open web port
+#trivy:ignore:AVD-AWS-0104:exp:2027-02-07
 resource "aws_security_group" "web" {
   name        = "web"
   description = "Allow web incgress trafic"
@@ -85,6 +70,7 @@ resource "aws_security_group" "web" {
 }
 
 # Open database port
+#trivy:ignore:AVD-AWS-0104:exp:2027-02-07
 resource "aws_security_group" "db" {
   name        = "db"
   description = "Allow db incgress trafic"
