@@ -10,8 +10,11 @@ resource "aws_instance" "db" {
     aws_security_group.administration.id,
     aws_security_group.db.id,
   ]
-  subnet_id = aws_subnet.db.id
-  user_data = file("scripts/first-boot-db.sh")
+  subnet_id                   = aws_subnet.db.id
+  associate_public_ip_address = true
+
+  depends_on = [aws_route_table_association.db]
+  user_data  = file("scripts/first-boot-db.sh")
   tags = {
     Name = each.key
   }
