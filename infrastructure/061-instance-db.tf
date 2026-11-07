@@ -17,6 +17,13 @@ resource "aws_instance" "db" {
   user_data  = file("scripts/first-boot-db.sh")
   tags = {
     Name = each.key
+    root_block_device {
+      encrypted = true
+    }
+
+    metadata_options {
+      http_tokens = "required"
+    }
   }
 }
 

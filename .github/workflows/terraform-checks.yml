@@ -52,4 +52,7 @@ jobs:
           version: v0.76.2
 
       - name: Scan Terraform configuration
+        env:
+          TF_VAR_public_key: ${{ vars.SSH_PUBLIC_KEY }}
+          TF_VAR_admin_cidr: ${{ vars.ADMIN_CIDR }}
         run: trivy config --exit-code 1 .
