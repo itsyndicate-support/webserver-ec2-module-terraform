@@ -28,6 +28,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.3.1
+        with:
+          version: v0.65.0
+
       - name: Run Trivy
         uses: aquasecurity/trivy-action@v0.33.1
         with:
@@ -37,3 +42,4 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: '1'
           format: table
+          skip-setup-trivy: true
