@@ -15,9 +15,17 @@ resource "aws_route_table_association" "http" {
   route_table_id = aws_route_table.public.id
 }
 
-# Associate db route
-resource "aws_route_table_association" "db" {
-  subnet_id      = aws_subnet.db.id
-  route_table_id = aws_route_table.public.id
+# Private route table for DB subnet
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.terraform.id
+
+  tags = {
+    Name = "private-db"
+  }
 }
 
+# Associate DB subnet with private route table
+resource "aws_route_table_association" "db_private" {
+  subnet_id      = aws_subnet.db.id
+  route_table_id = aws_route_table.private.id
+}
