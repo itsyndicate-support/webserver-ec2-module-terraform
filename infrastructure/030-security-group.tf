@@ -14,7 +14,7 @@ resource "aws_security_group" "administration" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.admin_ip]
   }
 
   # Allow icmp
@@ -22,14 +22,22 @@ resource "aws_security_group" "administration" {
     from_port   = 8
     to_port     = 0
     protocol    = "icmp"
+    cidr_blocks = [var.admin_ip]
+  }
+
+  # Allow HTTP outbound traffic
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Open access to public network
+  # Allow HTTPS outbound traffic
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -59,11 +67,19 @@ resource "aws_security_group" "web" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Open access to public network
+  # Allow HTTP outbound traffic
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow HTTPS outbound traffic
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -85,11 +101,19 @@ resource "aws_security_group" "db" {
     cidr_blocks = [var.network_http["cidr"]]
   }
 
-  # Open access to public network
+  # Allow HTTP outbound traffic
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow HTTPS outbound traffic
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
