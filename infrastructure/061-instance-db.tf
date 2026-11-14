@@ -18,12 +18,15 @@ resource "aws_instance" "db" {
     encrypted = true
   }
 
+  user_data = file("scripts/first-boot-db.sh")
+
   metadata_options {
     http_tokens = "required"
   }
 
   tags = {
-    Name = each.key
+    Name        = "${var.environment}-${each.key}"
+    Environment = var.environment
   }
 }
 

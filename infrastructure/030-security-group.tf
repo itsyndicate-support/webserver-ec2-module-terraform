@@ -45,7 +45,8 @@ resource "aws_security_group" "administration" {
   }
 
   tags = {
-    Name = "administration"
+    Name        = "${var.environment}-administration"
+    Environment = var.environment
   }
 }
 
@@ -73,7 +74,8 @@ resource "aws_security_group" "web" {
   egress = []
 
   tags = {
-    Name = "web"
+    Name        = "${var.environment}-web"
+    Environment = var.environment
   }
 }
 
@@ -93,6 +95,7 @@ resource "aws_security_group" "db" {
   egress = []
 
   tags = {
-    Name = "db"
+    Name        = "${var.environment}-db"
+    Environment = var.environment
   }
 }
