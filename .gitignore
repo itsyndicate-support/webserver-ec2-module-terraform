@@ -8,6 +8,7 @@
 # Local variable values
 *.tfvars
 *.tfvars.json
+!infrastructure/environments/*.tfvars
 
 # Saved execution plans
 *.tfplan

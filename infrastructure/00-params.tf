@@ -45,3 +45,13 @@ variable "admin_cidr" {
   type        = string
   description = "Public IPv4 address allowed to connect over SSH, in CIDR notation"
 }
+
+variable "environment" {
+  type        = string
+  description = "Deployment environment"
+
+  validation {
+    condition     = contains(["test", "production"], var.environment)
+    error_message = "Environment must be either test or production."
+  }
+}
