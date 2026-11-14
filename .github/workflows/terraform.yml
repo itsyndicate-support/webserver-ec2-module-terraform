@@ -1,0 +1,161 @@
+name: Terraform AWS
+
+run-name: Terraform ${{ inputs.operation }} — ${{ inputs.environment }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Terraform operation
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+      confirm:
+        description: Type destroy to confirm infrastructure deletion
+        required: false
+        default: ""
+        type: string
+
+      environment:
+        description: Target environment
+        required: true
+        default: test
+        type: choice
+        options:
+          - test
+          - production
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: terraform-${{ inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  TF_VAR_public_key: ${{ vars.SSH_PUBLIC_KEY }}
+  TF_VAR_admin_cidr: ${{ vars.ADMIN_CIDR }}
+  TARGET_ENVIRONMENT: ${{ inputs.environment }}
+
+jobs:
+  terraform:
+    if: github.repository == vars.DEPLOY_REPOSITORY && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: infrastructure
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Check destroy confirmation
+        if: inputs.operation == 'destroy' && inputs.confirm != 'destroy'
+        run: |
+          echo "Enter destroy in the confirm field to delete infrastructure."
+          exit 1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.16.0"
+          terraform_wrapper: false
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Check AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Initialize Terraform
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=$TF_STATE_BUCKET" \
+            -backend-config="key=$TF_STATE_KEY" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true"
+        env:
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
+
+      - name: Validate configuration
+        run: terraform validate -no-color
+
+      - name: Set up TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.65.0
+
+      - name: Initialize TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run: tflint --format compact
+
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: v0.76.2
+
+      - name: Scan Terraform configuration
+        run: trivy config --exit-code 1 .
+
+      - name: Set up Go
+        if: inputs.operation == 'apply'
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+
+      - name: Terraform plan
+        if: inputs.operation == 'plan' || inputs.operation == 'apply'
+        run: terraform plan -input=false -no-color -lock-timeout=5m -var-file="environments/$TARGET_ENVIRONMENT.tfvars" -out=tfplan
+
+      - name: Terraform apply
+        if: inputs.operation == 'apply'
+        run: terraform apply -input=false -no-color -lock-timeout=5m tfplan
+
+      - name: Check web servers
+        if: inputs.operation == 'apply'
+        run: |
+          terraform output -json http_urls | jq -er '.[]' |
+            while IFS= read -r url; do
+              echo "Checking $url"
+              curl --fail --silent --show-error --output /dev/null \
+                --retry 30 --retry-delay 10 --retry-all-errors \
+                --retry-max-time 300 --connect-timeout 5 --max-time 15 "$url"
+            done
+
+      - name: Run Terratest
+        if: inputs.operation == 'apply'
+        working-directory: tests
+        run: go test -v -count=1 -timeout=10m ./...
+
+      - name: Terraform destroy plan
+        if: inputs.operation == 'destroy'
+        run: terraform plan -destroy -input=false -no-color -lock-timeout=5m -var-file="environments/$TARGET_ENVIRONMENT.tfvars" -out=destroy.tfplan
+
+      - name: Terraform destroy
+        if: inputs.operation == 'destroy'
+        run: terraform apply -input=false -no-color -lock-timeout=5m destroy.tfplan

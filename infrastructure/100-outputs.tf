@@ -13,3 +13,10 @@ output "db_ip" {
     instance.id => instance.private_ip
   }
 }
+
+output "http_urls" {
+  value = {
+    for name, eip in aws_eip.public_http :
+    name => "http://${eip.public_ip}"
+  }
+}
