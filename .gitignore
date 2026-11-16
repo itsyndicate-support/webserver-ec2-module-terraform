@@ -1,0 +1,22 @@
+# Downloaded Terraform dependencies
+**/.terraform/*
+
+# Terraform state and backups
+*.tfstate
+*.tfstate.*
+
+# Local variable values
+*.tfvars
+*.tfvars.json
+!infrastructure/environments/*.tfvars
+
+# Saved execution plans
+*.tfplan
+tfplan
+
+# Local backend configuration
+backend.hcl
+
+# Crash logs and private SSH keys
+crash.log
+*.pem

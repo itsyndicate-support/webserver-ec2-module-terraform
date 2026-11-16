@@ -10,10 +10,23 @@ resource "aws_instance" "db" {
     aws_security_group.administration.id,
     aws_security_group.db.id,
   ]
-  subnet_id = aws_subnet.db.id
+  subnet_id                   = aws_subnet.db.id
+  associate_public_ip_address = true
+
+  depends_on = [aws_route_table_association.db]
+  root_block_device {
+    encrypted = true
+  }
+
   user_data = file("scripts/first-boot-db.sh")
+
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = {
-    Name = each.key
+    Name        = "${var.environment}-${each.key}"
+    Environment = var.environment
   }
 }
 
