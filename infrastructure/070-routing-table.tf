@@ -1,23 +1,47 @@
-# Create ande associate route
-
-# Routing table configuration
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.terraform.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
 }
 
-# Associate http route
 resource "aws_route_table_association" "http" {
   subnet_id      = aws_subnet.http.id
   route_table_id = aws_route_table.public.id
 }
 
-# Associate db route
-resource "aws_route_table_association" "db" {
-  subnet_id      = aws_subnet.db.id
-  route_table_id = aws_route_table.public.id
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = {
+    Name = "week11-nat"
+  }
 }
 
+resource "aws_nat_gateway" "db" {
+  allocation_id     = aws_eip.nat.id
+  subnet_id         = aws_subnet.http.id
+  connectivity_type = "public"
+
+  tags = {
+    Name = "week11-db-nat"
+  }
+
+  depends_on = [aws_internet_gateway.gw, aws_route_table_association.http]
+}
+
+resource "aws_route_table" "db" {
+  vpc_id = aws_vpc.terraform.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.db.id
+  }
+}
+
+resource "aws_route_table_association" "db" {
+  subnet_id      = aws_subnet.db.id
+  route_table_id = aws_route_table.db.id
+}

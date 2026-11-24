@@ -10,10 +10,20 @@ resource "aws_instance" "db" {
     aws_security_group.administration.id,
     aws_security_group.db.id,
   ]
-  subnet_id = aws_subnet.db.id
-  user_data = file("scripts/first-boot-db.sh")
+  subnet_id                   = aws_subnet.db.id
+  associate_public_ip_address = false
+  user_data                   = file("scripts/first-boot-db.sh")
+  user_data_replace_on_change = true
+
+  depends_on = [aws_route_table_association.db]
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  root_block_device {
+    encrypted = true
+  }
   tags = {
     Name = each.key
   }
 }
-
